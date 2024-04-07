@@ -16,31 +16,26 @@ val abelFamily = FontFamily(
 
 val Typography = Typography(
     displayLarge = TextStyle(
-        fontFamily = abelFamily,
         fontWeight = FontWeight.Normal,
         color = Color.Black,
         fontSize = 56.sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = abelFamily,
         fontWeight = FontWeight.Normal,
         color = Color.Black,
         fontSize = 24.sp
     ),
     titleLarge = TextStyle(
-        fontFamily = abelFamily,
         fontWeight = FontWeight.Normal,
         color = Color.Black,
         fontSize = 20.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = abelFamily,
         fontWeight = FontWeight.Normal,
         color = Color.Black,
         fontSize = 16.sp
     ),
     labelLarge = TextStyle(
-        fontFamily = abelFamily,
         fontWeight = FontWeight.Normal,
         color = Color.Black,
         fontSize = 14.sp

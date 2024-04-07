@@ -20,9 +20,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -52,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.R
-import com.example.myapplication.ui.theme.CalcLight
 
 @Composable
 fun HomeScreen(navController:NavController) {
@@ -618,35 +620,58 @@ fun NewsScreen() {
     )) }
     val searchText = rememberSaveable { mutableStateOf("") }
     val filteredNewsList = remember { mutableStateOf(newsList.value) }
+    val showClearButton = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TextField(
-            value = searchText.value,
-            onValueChange = { searchText.value = it },
-            modifier = Modifier.padding(16.dp),
-            placeholder = { Text("Поиск...", color = colorScheme.secondary) },
-            singleLine = true,
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (searchText.value.isEmpty()) {
-                        filteredNewsList.value = newsList.value
-                    } else {
-                        filteredNewsList.value = newsList.value.filter {
-                            it.contains(searchText.value, true)
+        Row {
+            TextField(
+                value = searchText.value,
+                onValueChange = { searchText.value = it },
+                modifier = Modifier.padding(16.dp),
+                placeholder = { Text("Поиск...", color = colorScheme.secondary) },
+                singleLine = true,
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (searchText.value.isEmpty()) {
+                            filteredNewsList.value = newsList.value
+                        }
+                        else {
+                            filteredNewsList.value = newsList.value.filter {
+                                it.contains(searchText.value, true)
+                            }
+                            showClearButton.value = true
                         }
                     }
-                }
+                )
             )
-        )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
+        if (showClearButton.value) {
+            IconButton(
+                modifier = Modifier
+                    .padding(0.dp)
+                    .size(32.dp),
+                onClick = {
+                    searchText.value = ""
+                    filteredNewsList.value = newsList.value
+                    showClearButton.value = false
+                }
 
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_close_24),
+                    contentDescription = "Clear",
+                    tint = colorScheme.secondary
+                )
+            }
+        }
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(0.dp),
             verticalArrangement = Arrangement.Top,
             content = {
                 items(filteredNewsList.value) { newsItem ->
@@ -656,6 +681,9 @@ fun NewsScreen() {
         )
     }
 }
+
+
+
 
 @Composable
 fun NewsItem(newsItem: String) {
@@ -670,6 +698,7 @@ fun NewsItem(newsItem: String) {
         )
     }
 }
+
 
 @Preview
 @Composable
