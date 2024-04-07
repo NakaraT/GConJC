@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">GeneticCalc</string>
+    <string name="title_home">Главная</string>
+    <string name="title_dashboard">Таблица</string>
+    <string name="title_information">Информация</string>
+    <string name="button_eye">Цвет глаз</string>
+    <string name="button_hand">Левша/Правша</string>
+    <string name="button_blood">Группа крови</string>
+    <string name="button_hairs">Цвет волос</string>
+    <string name="button_news">Новости</string>
+    <string name="title_blood">Кровь</string>
+</resources>
