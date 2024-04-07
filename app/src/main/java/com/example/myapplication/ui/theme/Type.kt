@@ -1,18 +1,48 @@
 package com.example.myapplication.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
+
+val abelFamily = FontFamily(
+    Font(R.font.casual, FontWeight.Normal),
+)
 
 
 val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+    displayLarge = TextStyle(
+        fontFamily = abelFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        color = Color.Black,
+        fontSize = 56.sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = abelFamily,
+        fontWeight = FontWeight.Normal,
+        color = Color.Black,
+        fontSize = 24.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = abelFamily,
+        fontWeight = FontWeight.Normal,
+        color = Color.Black,
+        fontSize = 20.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = abelFamily,
+        fontWeight = FontWeight.Normal,
+        color = Color.Black,
+        fontSize = 16.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = abelFamily,
+        fontWeight = FontWeight.Normal,
+        color = Color.Black,
+        fontSize = 14.sp
     )
 )
