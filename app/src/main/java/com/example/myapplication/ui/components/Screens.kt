@@ -621,6 +621,14 @@ fun NewsScreen() {
     val searchText = rememberSaveable { mutableStateOf("") }
     val filteredNewsList = remember { mutableStateOf(newsList.value) }
     val showClearButton = remember { mutableStateOf(false) }
+    val trailingIconView = @Composable {
+        IconButton(onClick = {
+            searchText.value = ""
+            filteredNewsList.value = newsList.value
+        }) {
+            Icon(Icons.Filled.Close, contentDescription = "Close Button", modifier = Modifier.size(25.dp), tint = Color.Black)
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -646,30 +654,12 @@ fun NewsScreen() {
                             showClearButton.value = true
                         }
                     }
-                )
+                ), trailingIcon = if (!searchText.value.isEmpty())trailingIconView else null
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        if (showClearButton.value) {
-            IconButton(
-                modifier = Modifier
-                    .padding(0.dp)
-                    .size(32.dp),
-                onClick = {
-                    searchText.value = ""
-                    filteredNewsList.value = newsList.value
-                    showClearButton.value = false
-                }
 
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_close_24),
-                    contentDescription = "Clear",
-                    tint = colorScheme.secondary
-                )
-            }
-        }
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(0.dp),
             verticalArrangement = Arrangement.Top,
