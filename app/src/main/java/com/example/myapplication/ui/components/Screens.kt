@@ -36,6 +36,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
 
@@ -609,23 +612,26 @@ fun RelativeItem() {
 
 @Composable
 fun NewsScreen() {
-    val newsList = remember { mutableStateOf(listOf("1", "2")) }
+    val newsList = remember { mutableStateOf(listOf<String>()) }
     val searchText = rememberSaveable { mutableStateOf("") }
     val filteredNewsList = remember { mutableStateOf(newsList.value) }
     val showClearButton = remember { mutableStateOf(false) }
-    val textprik = remember { mutableStateOf("") }
 
-    fun addNews(item: String) {
-        val updatedList = newsList.value.toMutableList()
-        updatedList.add(item)
-        newsList.value = updatedList
+    @Composable
+    fun addNews() {
+        rememberCoroutineScope().launch(Dispatchers.IO) {
+            val document =
+                Jsoup.connect("https://ria.ru/keyword_genetika/").get()
+            newsList.value = document
+                .getElementsByClass("list-item__title color-font-hover-only")
+                .map { it.text().toString() }
+            filteredNewsList.value = newsList.value
+
+        }
     }
-    val thread = Thread{
-        val document = Jsoup.connect("https://nsaturnia.ru/kak-pisat-stixi/vvodnaya-lekciya/").get()
-        val title = document.title()
-        textprik.value = title
-    }
-    thread.start()
+
+    addNews()
+
     val trailingIconView = @Composable {
         IconButton(onClick = {
             searchText.value = ""
@@ -661,10 +667,6 @@ fun NewsScreen() {
                 ), trailingIcon = if (!searchText.value.isEmpty())trailingIconView else null
             )
         }
-        
-        Text(text = textprik.value)
-
-        Button(onClick = { addNews(textprik.value) }) {}
 
         Spacer(modifier = Modifier.height(16.dp))
 
