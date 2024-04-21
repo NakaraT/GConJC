@@ -30,6 +30,9 @@ import com.example.myapplication.ui.components.NewsScreen
 
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.utils.Constants
+import okhttp3.Request
+import org.json.JSONObject
+import java.io.IOException
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)

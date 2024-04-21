@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -55,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import org.jsoup.Jsoup
+
 
 @Composable
 fun HomeScreen(navController:NavController) {
@@ -609,18 +609,23 @@ fun RelativeItem() {
 
 @Composable
 fun NewsScreen() {
-    val newsList = remember { mutableStateOf(listOf(
-        "Вы когда-нибудь чувствовали себя пластиковым пакетом?",
-        "Дрейфующий по ветру",
-        "Желая начать все сначала",
-        "Ты когда-нибудь чувствовал себя таким тонким, как бумага?",
-        "Как карточный домик",
-        "Один удар от обрушения",
-        "Вы когда-нибудь чувствовали себя уже глубоко похороненным?"
-    )) }
+    val newsList = remember { mutableStateOf(listOf("1", "2")) }
     val searchText = rememberSaveable { mutableStateOf("") }
     val filteredNewsList = remember { mutableStateOf(newsList.value) }
     val showClearButton = remember { mutableStateOf(false) }
+    val textprik = remember { mutableStateOf("") }
+
+    fun addNews(item: String) {
+        val updatedList = newsList.value.toMutableList()
+        updatedList.add(item)
+        newsList.value = updatedList
+    }
+    val thread = Thread{
+        val document = Jsoup.connect("https://nsaturnia.ru/kak-pisat-stixi/vvodnaya-lekciya/").get()
+        val title = document.title()
+        textprik.value = title
+    }
+    thread.start()
     val trailingIconView = @Composable {
         IconButton(onClick = {
             searchText.value = ""
@@ -629,7 +634,6 @@ fun NewsScreen() {
             Icon(Icons.Filled.Close, contentDescription = "Close Button", modifier = Modifier.size(25.dp), tint = Color.Black)
         }
     }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
@@ -657,11 +661,17 @@ fun NewsScreen() {
                 ), trailingIcon = if (!searchText.value.isEmpty())trailingIconView else null
             )
         }
+        
+        Text(text = textprik.value)
+
+        Button(onClick = { addNews(textprik.value) }) {}
 
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(0.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(0.dp),
             verticalArrangement = Arrangement.Top,
             content = {
                 items(filteredNewsList.value) { newsItem ->
