@@ -625,9 +625,8 @@ fun NewsScreen() {
             newsList.value = document
                 .getElementsByClass("list-item__title color-font-hover-only")
                 .map { it.text().toString() }
-            filteredNewsList.value = newsList.value
-
         }
+        filteredNewsList.value = newsList.value
     }
 
     addNews()
@@ -645,42 +644,56 @@ fun NewsScreen() {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row {
-            TextField(
-                value = searchText.value,
-                onValueChange = { searchText.value = it },
+
+
+        if (newsList.value.isEmpty()) {
+            Text("Не удалось загрузить данные.",
                 modifier = Modifier.padding(16.dp),
-                placeholder = { Text("Поиск...", color = colorScheme.secondary) },
-                singleLine = true,
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        if (searchText.value.isEmpty()) {
-                            filteredNewsList.value = newsList.value
-                        }
-                        else {
-                            filteredNewsList.value = newsList.value.filter {
-                                it.contains(searchText.value, true)
+                color = colorScheme.primary)
+        } else {
+            Row {
+                TextField(
+                    value = searchText.value,
+                    onValueChange = { searchText.value = it },
+                    modifier = Modifier.padding(16.dp),
+                    placeholder = { Text("Поиск...", color = colorScheme.secondary) },
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            if (searchText.value.isEmpty()) {
+                                filteredNewsList.value = newsList.value
+                            } else {
+                                filteredNewsList.value = newsList.value.filter {
+                                    it.contains(searchText.value, true)
+                                }
+                                showClearButton.value = true
                             }
-                            showClearButton.value = true
+                        }
+                    ), trailingIcon = if (!searchText.value.isEmpty()) trailingIconView else null
+                )
+            }
+
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (filteredNewsList.value.isEmpty()) {
+                Text("Ничего не найдено.",
+                    modifier = Modifier.padding(16.dp),
+                    color = colorScheme.primary)
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(0.dp),
+                    verticalArrangement = Arrangement.Top,
+                    content = {
+                        items(filteredNewsList.value) { newsItem ->
+                            NewsItem(newsItem)
                         }
                     }
-                ), trailingIcon = if (!searchText.value.isEmpty())trailingIconView else null
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(0.dp),
-            verticalArrangement = Arrangement.Top,
-            content = {
-                items(filteredNewsList.value) { newsItem ->
-                    NewsItem(newsItem)
-                }
+                )
             }
-        )
+        }
     }
 }
 
