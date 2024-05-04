@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,12 +25,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.components.DashboardScreen
+import com.example.myapplication.ui.components.EyesScreen
 import com.example.myapplication.ui.components.HomeScreen
 import com.example.myapplication.ui.components.InformationScreen
 import com.example.myapplication.ui.components.NewsScreen
 
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.utils.Constants
+import com.example.myapplication.utils.PREFERENCES
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.IOException
@@ -39,6 +42,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val sharedPreferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE)
             val navController = rememberNavController()
             MyApplicationTheme {
                 Surface(
@@ -48,8 +52,10 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         bottomBar = {
                             BottomNavigationBar(navController = navController)
-                        }, content = { padding ->
-                            NavHostContainer(navController = navController, padding = padding)
+                        },
+                        content = { padding ->
+                            NavHostContainer(
+                                navController = navController, padding = padding, sharedPreferences = sharedPreferences)
                         }
                     )
                 }
@@ -62,7 +68,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NavHostContainer(
     navController: NavHostController,
-    padding: PaddingValues
+    padding: PaddingValues,
+    sharedPreferences : SharedPreferences
 ) {
 
     NavHost(
@@ -71,7 +78,7 @@ fun NavHostContainer(
         modifier = Modifier.padding(paddingValues = padding),
         builder = {
             composable("home") {
-                HomeScreen(navController = navController)
+                HomeScreen(navController = navController, sharedPreferences = sharedPreferences)
             }
             composable("information") {
                 InformationScreen()
@@ -80,7 +87,10 @@ fun NavHostContainer(
                 DashboardScreen()
             }
             composable("news") {
-                NewsScreen()
+                NewsScreen(sharedPreferences = sharedPreferences)
+            }
+            composable("eyes") {
+                EyesScreen()
             }
         }
     )

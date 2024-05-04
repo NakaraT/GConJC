@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.components
 
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +20,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -54,22 +58,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import com.example.myapplication.ui.theme.LocalTheme
+import com.example.myapplication.utils.EDIT_KEY
+import com.example.myapplication.utils.SEARCH_KEY
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
+import org.jsoup.internal.StringUtil.padding
 
 
 @Composable
-fun HomeScreen(navController:NavController) {
+fun HomeScreen(navController:NavController, sharedPreferences: SharedPreferences) {
     val customFontFamily = FontFamily(
         Font(R.font.casual)
     )
+    LocalTheme.value = sharedPreferences.getBoolean(EDIT_KEY, false)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 0.dp)
     ) {
+        IconButton(modifier = Modifier.align(alignment = Alignment.End),
+            onClick = {
+            LocalTheme.value = !LocalTheme.value
+            sharedPreferences.edit().putBoolean(EDIT_KEY, LocalTheme.value).apply()
+
+        }) {
+            Icon(
+                painter = painterResource(if (!LocalTheme.value) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
+                contentDescription = "theme switcher"
+
+            )
+        }
         Text(
             text = "GENETICS",
             fontSize = 54.sp,
@@ -106,8 +127,7 @@ fun HomeScreen(navController:NavController) {
             Button(
                 onClick =
                 {
-                    /* Обработка нажатия */
-
+                    navController.navigate("eyes")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -312,7 +332,7 @@ fun DashboardScreen() {
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.CenterStart,
                 ) {
-                    Text(text = "A/a", color = colorScheme.primary)
+                Text(text = "A/a", color = colorScheme.primary)
                 }
 
 //1.2
@@ -558,7 +578,6 @@ fun InformationScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .size(128.dp),
-//                  colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF9C27B0))
             ) {
                 Icon(
                     imageVector = Icons.Filled.AddCircle,
@@ -610,26 +629,124 @@ fun RelativeItem() {
     }
 }
 
+
+
 @Composable
-fun NewsScreen() {
+fun EyesScreen() {
+    val colors = listOf("Неизвестно", "Карий", "Зелёный", "Голубой")
+    val fatherEyeColor = remember { mutableStateOf(colors[0]) }
+    val motherEyeColor = remember { mutableStateOf(colors[0]) }
+    val result = remember { mutableStateOf(0.0) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 64.dp), horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            EyeColorDropdown("Папа", fatherEyeColor.value) { fatherEyeColor.value = it }
+            EyeColorDropdown("Мама", motherEyeColor.value) { motherEyeColor.value = it }
+            }
+        }
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 128.dp),
+            onClick = {
+                calculateProbability(
+                    fatherEyeColor.value, motherEyeColor.value
+                )
+            }
+        ) {
+            Text("Расчитать вероятность")
+        }
+
+        // Вывод результата
+        Text("Вероятность: ${result.value}",modifier = Modifier.padding(vertical = 184.dp),)
+    }
+
+
+@Composable
+fun EyeColorDropdown(label: String, selectedColor: String, onColorSelected: (String) -> Unit) {
+    val colors = listOf("Карий", "Зелёный", "Голубой")
+    var expanded by remember { mutableStateOf(false) }
+
+    Column {
+        Text(label, fontSize = 20.sp)
+        Box(
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                selectedColor,
+                color = colorScheme.primary,
+                fontSize = 20.sp,
+                modifier = Modifier.clickable { expanded = true }
+            )
+
+            DropdownMenu(
+                expanded = expanded,
+
+                onDismissRequest = { expanded = false }
+            ) {
+                colors.forEach { color ->
+                    DropdownMenuItem(onClick = {
+                        onColorSelected(color)
+                        expanded = false
+                    }) {
+                        Text(
+                            color,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = colorScheme.primary,
+                            fontSize = 20.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun calculateProbability(fatherEyeColor: String, motherEyeColor: String) {
+
+}
+
+@Composable
+fun NewsScreen(sharedPreferences: SharedPreferences) {
     val newsList = remember { mutableStateOf(listOf<String>()) }
     val searchText = rememberSaveable { mutableStateOf("") }
     val filteredNewsList = remember { mutableStateOf(newsList.value) }
     val showClearButton = remember { mutableStateOf(false) }
+    val expanded = remember { mutableStateOf(false) }
+    val items = sharedPreferences.getStringSet(SEARCH_KEY, mutableSetOf())
+    var localItems = mutableSetOf<String>()
 
     @Composable
     fun addNews() {
         rememberCoroutineScope().launch(Dispatchers.IO) {
-            val document =
-                Jsoup.connect("https://ria.ru/keyword_genetika/").get()
-            newsList.value = document
-                .getElementsByClass("list-item__title color-font-hover-only")
-                .map { it.text().toString() }
+            try {
+                val document =
+                    Jsoup.connect("https://ria.ru/keyword_genetika/").get()
+                newsList.value = document
+                    .getElementsByClass("list-item__title color-font-hover-only")
+                    .map { it.text().toString() }
+            }
+            catch (e:Exception){
+
+            }
         }
-        filteredNewsList.value = newsList.value
     }
 
     addNews()
+    
+    //мув гения
+    if (searchText.value.isEmpty()) {
+        filteredNewsList.value = newsList.value
+    }
 
     val trailingIconView = @Composable {
         IconButton(onClick = {
@@ -647,16 +764,42 @@ fun NewsScreen() {
 
 
         if (newsList.value.isEmpty()) {
-            Text("Не удалось загрузить данные.",
-                modifier = Modifier.padding(16.dp),
-                color = colorScheme.primary)
+            Column {
+                Row (verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Text(
+                        "Не удалось загрузить данные.",
+                        modifier = Modifier.padding(32.dp),
+                        color = colorScheme.primary
+                    )
+                }
+//                CustomLinearProgressBar()
+                Row (verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ){
+                    CustomCircularProgressBar()
+                }
+
+            }
+
         } else {
-            Row {
+            Column {
                 TextField(
                     value = searchText.value,
                     onValueChange = { searchText.value = it },
                     modifier = Modifier.padding(16.dp),
-                    placeholder = { Text("Поиск...", color = colorScheme.secondary) },
+                    placeholder = {
+                        Text(
+                            "Поиск...",
+                            modifier = Modifier.clickable{ expanded.value = true },
+                            color = colorScheme.secondary) },
+
                     singleLine = true,
                     keyboardActions = KeyboardActions(
                         onDone = {
@@ -666,35 +809,69 @@ fun NewsScreen() {
                                 filteredNewsList.value = newsList.value.filter {
                                     it.contains(searchText.value, true)
                                 }
+                                localItems.add(searchText.value)
+                                sharedPreferences.edit().putStringSet(SEARCH_KEY, localItems).apply()
                                 showClearButton.value = true
                             }
                         }
                     ), trailingIcon = if (!searchText.value.isEmpty()) trailingIconView else null
                 )
-            }
-
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (filteredNewsList.value.isEmpty()) {
-                Text("Ничего не найдено.",
-                    modifier = Modifier.padding(16.dp),
-                    color = colorScheme.primary)
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(0.dp),
-                    verticalArrangement = Arrangement.Top,
-                    content = {
-                        items(filteredNewsList.value) { newsItem ->
-                            NewsItem(newsItem)
-                        }
+                DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
+                    items?.forEach { item ->
+                        androidx.compose.material3.DropdownMenuItem(text = {
+                            Text(text = item)
+                        }, onClick = {
+                            searchText.value = item // Обработка выбора элемента
+                            expanded.value = false // Скрытие меню
+                        })
                     }
-                )
+                }
             }
         }
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (filteredNewsList.value.isEmpty()) {
+            Text("Ничего не найдено.",
+                modifier = Modifier.padding(32.dp),
+                color = colorScheme.primary)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(0.dp),
+                verticalArrangement = Arrangement.Top,
+                content = {
+                    items(filteredNewsList.value) { newsItem ->
+                        NewsItem(newsItem)
+                    }
+                }
+            )
+        }
     }
+}
+
+//@Composable
+//private fun CustomLinearProgressBar(){
+//    Column(modifier = Modifier.fillMaxWidth()) {
+//        LinearProgressIndicator(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(15.dp),
+//            backgroundColor = Color.LightGray,
+//            color = colorScheme.primary
+//        )
+//    }
+//}
+
+@Composable
+private fun CustomCircularProgressBar(){
+    CircularProgressIndicator(
+        modifier = Modifier.size(64.dp),
+        color = colorScheme.primary,
+        strokeWidth = 10.dp)
+
 }
 
 
@@ -715,8 +892,8 @@ fun NewsItem(newsItem: String) {
 }
 
 
-@Preview
-@Composable
-fun NewsScreenPreview() {
-    NewsScreen()
-}
+//@Preview
+//@Composable
+//fun NewsScreenPreview(sharedPreferences: SharedPreferences) {
+//    NewsScreen(sharedPreferences: SharedPreferences)
+//}

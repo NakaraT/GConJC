@@ -10,11 +10,14 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key.Companion.Back
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
+val LocalTheme = mutableStateOf(false)
 
 private val DarkColorScheme = darkColorScheme(
     primary = GeneticsLight,
@@ -38,7 +41,7 @@ fun MyApplicationTheme(
 {
 
     MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme,
+        colorScheme = if (!LocalTheme.value) DarkColorScheme else LightColorScheme,
         typography = Typography,
         content = content
     )

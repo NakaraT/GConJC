@@ -6,6 +6,10 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import com.example.myapplication.models.BottomNavItem
 
+
+const val PREFERENCES = "NakaraT_Preference"
+const val EDIT_KEY = "dark_theme"
+const val SEARCH_KEY = "query"
 object Constants {
     val BottomNavItems = listOf(
         BottomNavItem(
