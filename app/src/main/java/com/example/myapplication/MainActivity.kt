@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,9 +32,6 @@ import com.example.myapplication.ui.components.NewsScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.utils.Constants
 import com.example.myapplication.utils.PREFERENCES
-import okhttp3.Request
-import org.json.JSONObject
-import java.io.IOException
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
