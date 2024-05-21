@@ -92,7 +92,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                 )
             }
         }
-
+            //asd
         items(allRelatives) { relative ->
             Row(
                 modifier = Modifier
