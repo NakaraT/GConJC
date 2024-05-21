@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.components
 
+import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,9 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.geneticcalc.ui.stateholder.viewModels.DashboardViewModel
+import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(dashboardViewModel: DashboardViewModel) {
 
     val parameters = listOf("A", "a")
     val selectedParam1 = remember { mutableStateOf(parameters[0]) }
@@ -301,4 +306,11 @@ fun getGeneCombination(cross: String): String {
     val gene2 = cross.substring(2, 3)
 
     return gene1 + gene2
+}
+
+class DashboardViewModelFactory(val application: Application):
+    ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return DashboardViewModel(application) as T
+    }
 }

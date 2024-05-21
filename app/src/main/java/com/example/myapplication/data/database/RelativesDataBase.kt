@@ -10,23 +10,27 @@ import com.example.geneticcalc.data.database.dao.RelativesProfilesDao
 import com.example.geneticcalc.data.database.entity.RelativesEntity
 
 
-@Database(entities = [RelativesEntity::class], version = 1, exportSchema = false)
+@Database (entities = [RelativesEntity::class], version = 1, exportSchema = false)
 abstract class RelativesDataBase : RoomDatabase() {
-    abstract fun RelativesProfilesDao(): RelativesProfilesDao
+    abstract fun relativesDao(): RelativesProfilesDao
 
     companion object {
-        @Volatile
-        private var INSTANCE: RelativesDataBase? = null
+
+        private var Instance: RelativesDataBase? = null
 
         fun getDatabase(context: Context): RelativesDataBase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    RelativesDataBase::class.java,
-                    "relatives_profile_database"
-                ).build()
-                INSTANCE = instance
-                instance
+            synchronized(this) {
+                var instance = Instance
+                if (instance == null) {
+                    instance = Room.databaseBuilder(
+                        context.applicationContext,
+                        RelativesDataBase::class.java,
+                        "relatives"
+                    ).fallbackToDestructiveMigration()
+                        .build()
+                    Instance = instance
+                }
+                return instance
             }
         }
     }

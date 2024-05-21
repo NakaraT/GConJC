@@ -29,12 +29,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.geneticcalc.ui.stateholder.viewModels.HomeViewModel
 import com.example.myapplication.R
 import com.example.myapplication.ui.theme.LocalTheme
 import com.example.myapplication.utils.EDIT_KEY
 
 @Composable
-fun HomeScreen(navController: NavController, sharedPreferences: SharedPreferences) {
+fun HomeScreen(navController: NavController, sharedPreferences: SharedPreferences, homeViewModel: HomeViewModel) {
     val customFontFamily = FontFamily(
         Font(R.font.casual)
     )

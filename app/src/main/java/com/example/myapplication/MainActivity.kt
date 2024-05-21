@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.app.Application
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,16 +19,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.geneticcalc.ui.stateholder.viewModels.DashboardViewModel
+import com.example.geneticcalc.ui.stateholder.viewModels.HomeViewModel
+import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
 import com.example.myapplication.ui.components.DashboardScreen
+import com.example.myapplication.ui.components.DashboardViewModelFactory
 import com.example.myapplication.ui.components.EyesScreen
 import com.example.myapplication.ui.components.HomeScreen
 import com.example.myapplication.ui.components.InformationScreen
 import com.example.myapplication.ui.components.NewsScreen
+import com.example.myapplication.ui.components.RelativeListViewModelFactory
 
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.utils.Constants
@@ -51,7 +60,12 @@ class MainActivity : ComponentActivity() {
                         },
                         content = { padding ->
                             NavHostContainer(
-                                navController = navController, padding = padding, sharedPreferences = sharedPreferences)
+                                navController = navController, padding = padding, sharedPreferences = sharedPreferences, homeViewModel = HomeViewModel(),
+                                relativesListViewModel =
+                                LocalViewModelStoreOwner.current?.let { viewModel (it, "RelativesListViewModel",RelativeListViewModelFactory(LocalContext.current.applicationContext as Application))},
+                                dashboardViewModel =
+                                LocalViewModelStoreOwner.current?.let { viewModel (it, "DashboardViewModel",DashboardViewModelFactory(LocalContext.current.applicationContext as Application))}
+                            )
                         }
                     )
                 }
@@ -65,7 +79,10 @@ class MainActivity : ComponentActivity() {
 fun NavHostContainer(
     navController: NavHostController,
     padding: PaddingValues,
-    sharedPreferences : SharedPreferences
+    sharedPreferences : SharedPreferences,
+    homeViewModel: HomeViewModel?,
+    relativesListViewModel: RelativesListViewModel?,
+    dashboardViewModel: DashboardViewModel?
 ) {
 
     NavHost(
@@ -74,13 +91,19 @@ fun NavHostContainer(
         modifier = Modifier.padding(paddingValues = padding),
         builder = {
             composable("home") {
-                HomeScreen(navController = navController, sharedPreferences = sharedPreferences)
+                if (homeViewModel != null) {
+                    HomeScreen(navController = navController, sharedPreferences = sharedPreferences, homeViewModel)
+                }
             }
             composable("information") {
-                InformationScreen()
+                if (relativesListViewModel != null) {
+                    InformationScreen(relativesListViewModel)
+                }
             }
             composable("dashboard") {
-                DashboardScreen()
+                if (dashboardViewModel != null) {
+                    DashboardScreen(dashboardViewModel)
+                }
             }
             composable("news") {
                 NewsScreen(sharedPreferences = sharedPreferences)

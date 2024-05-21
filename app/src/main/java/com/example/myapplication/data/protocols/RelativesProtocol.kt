@@ -9,10 +9,10 @@ interface RelativesProtocol {
     fun relativesList(): LiveData<List<RelativesEntity>>
 
     fun getRelativesItem(position: Int): LiveData<RelativesEntity>
-    val post: LiveData<PlaceholderPost>
+//    val post: LiveData<PlaceholderPost>
 
-    fun pushPost(): LiveData<PlaceholderPost>
-    val allPosts: MutableLiveData<List<PlaceholderPost>>
+//    fun pushPost(): LiveData<PlaceholderPost>
+//    val allPosts: MutableLiveData<List<PlaceholderPost>>
 
     fun addRelative()
     fun deleteRelative(id: Int)

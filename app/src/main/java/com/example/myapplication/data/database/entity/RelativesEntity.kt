@@ -4,11 +4,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "relatives_profiles_table")
+@Entity(tableName = "relatives")
 data class RelativesEntity(
+
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
-    var relativesType: String = "",
+
+    var relativeName: String = "",
     var eyeColor: String = "",
     var hairColor: String = "",
     var dateofBirth: String = "",
