@@ -5,12 +5,14 @@ import android.app.DatePickerDialog
 import android.widget.CalendarView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -21,7 +23,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -40,8 +44,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,10 +65,11 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
 
     var selectedName by remember { mutableStateOf("")}
     var selectedHairColor by remember { mutableStateOf("")}
+    var selectedDate by remember { mutableStateOf("")}
     val onSelectedNameChange = { text: String -> selectedName = text }
     val onSelectedHairColorChange = { text: String -> selectedHairColor = text }
+    val onSelectedDateChange = { text: String -> selectedDate = text }
     var selectedEyeColor by remember { mutableStateOf("")}
-    var selectedDate by remember { mutableStateOf("")}
     var selectedBloodType by remember { mutableStateOf("")}
     val bloodTypes = arrayOf("I+", "I-", "II+", "II-", "III+", "III-", "III+", "IV+", "IV-")
     val eyeColors = arrayOf("Голубые", "Карие", "Серые", "Зелёные")
@@ -75,9 +82,6 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 48.dp)
     ) {
-        item { Button(onClick = { relativesListViewModel.clearRelatives() }) {
-            Text(text = "ОЧИСТИТЬ ТАБЛИЦУ", color = Color.Red)
-        } }
         item {
             IconButton(
                 onClick = { isAddMenuVisible = true },
@@ -97,12 +101,22 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp),
+                    .padding(4.dp)
+                    .clickable{
+                        selectedDate = relative.dateofBirth
+                        selectedName = relative.relativeName
+                        selectedBloodType = relative.bloodType
+                        selectedEyeColor = relative.eyeColor
+                        selectedHairColor = relative.hairColor
+                        relativesListViewModel.deleteRelative(relative.id)
+                        isAddMenuVisible = true
+                    },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
                     painter = painterResource(R.drawable.baseline_man_24),
                     contentDescription = "Relative Logo",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
                     modifier = Modifier.size(120.dp)
                 )
 
@@ -115,152 +129,157 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         text = "Имя: ${relative.relativeName}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
                         text = "Дата рождения: ${relative.dateofBirth}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(top = 8.dp)
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(top = 16.dp)
                     )
-                    Text(
-                        text = "Цвет глаз: ${relative.eyeColor}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Text(
-                        text = "Цвет волос: ${relative.hairColor}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Text(
-                        text = "Группа крови: ${relative.bloodType}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Button(onClick = { relativesListViewModel.deleteRelative(relative.id)}) {
-                        Text(text = "Удалить!")
-                    }
-                    Button(onClick = {
-                        selectedDate = relative.dateofBirth
-                        selectedName = relative.relativeName
-                        selectedBloodType = relative.bloodType
-                        selectedEyeColor = relative.eyeColor
-                        selectedHairColor = relative.hairColor
-                        relativesListViewModel.deleteRelative(relative.id)
-                        isAddMenuVisible = true
-                    }) {
-                        Text(text = "Редактировать")
-                    }
+                }
+                IconButton(onClick = {
+                    relativesListViewModel.deleteRelative(relative.id)
+                }) {
+                    Icon(Icons.Filled.Close, contentDescription = "Close Button", modifier = Modifier.size(25.dp), tint = (MaterialTheme.colorScheme.secondary),)
                 }
             }
         }
     }
 }
     else {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
-            OutlinedTextField(
-                value = selectedName,
-                onValueChange = {onSelectedNameChange(it)},
-                label = { Text(text = "Имя")},
-                shape = RoundedCornerShape(16.dp),
-                trailingIcon = {if (selectedName.isNotEmpty()) IconButton(onClick = { onSelectedNameChange("") }) {
-                    Icon(Icons.Filled.Clear, contentDescription = null)
-                } else null})
-            OutlinedTextField(
-                value = selectedHairColor,
-                onValueChange = {onSelectedHairColorChange(it)},
-                label = { Text(text = "Цвет волос")},
-                shape = RoundedCornerShape(16.dp),
-                trailingIcon = {if (selectedHairColor.isNotEmpty()) IconButton(onClick = { onSelectedHairColorChange("") }) {
-                    Icon(Icons.Filled.Clear, contentDescription = null)
-                } else null})
-            ExposedDropdownMenuBox(expanded = isDateExpanded, onExpandedChange = {isDateExpanded = !isDateExpanded} ) {
+        Column(modifier = Modifier.fillMaxSize().padding(top = 32.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                OutlinedTextField(
+                    value = selectedName,
+                    textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                    onValueChange = {onSelectedNameChange(it)},
+                    label = { Text(text = "Имя", color = MaterialTheme.colorScheme.secondary, fontSize = 16.sp)},
+                    shape = RoundedCornerShape(16.dp),
+                    trailingIcon = {if (selectedName.isNotEmpty()) IconButton(onClick = { onSelectedNameChange("") }) {
+                        Icon(Icons.Filled.Clear, contentDescription = null)
+                    } else null})}
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                OutlinedTextField(
+                    value = selectedHairColor,
+                    textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                    onValueChange = {onSelectedHairColorChange(it)},
+                    label = { Text(text = "Цвет волос", color = MaterialTheme.colorScheme.secondary, fontSize = 16.sp)},
+                    shape = RoundedCornerShape(16.dp),
+                    trailingIcon = {if (selectedHairColor.isNotEmpty()) IconButton(onClick = { onSelectedHairColorChange("") }) {
+                        Icon(Icons.Filled.Clear, contentDescription = null)
+                    } else null})}
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceAround
+            ) {
                 OutlinedTextField(
                     value = selectedDate,
-                    onValueChange = {},
-                    label = { Text("Дата рождения", fontSize = 10.sp) },
-                    readOnly = true,
-                    modifier = Modifier
-                        .menuAnchor()
-                        .alpha(if (isDateExpanded) 0f else 1f),
+                    textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                    onValueChange = {onSelectedDateChange(it)},
+                    label = { Text("Дата рождения", color = MaterialTheme.colorScheme.secondary, fontSize = 16.sp) },
                     shape = RoundedCornerShape(16.dp),
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = isDateExpanded
-                        )})
-                if (isDateExpanded){
-                AndroidView(
-                    { CalendarView(it) },
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .border(2.dp, color = Color.Black)
-                        .align(Alignment.CenterHorizontally),
-                    update = { views ->
-                        views.setOnDateChangeListener { calendarView, year, month, dayOfMonth ->
-                            selectedDate = "$dayOfMonth, $month, $year"
-                            isDateExpanded = false
-                        }
-                    }
-                )}
-            }
-            ExposedDropdownMenuBox(expanded = isBloodTypesExpanded, onExpandedChange = {isBloodTypesExpanded = !isBloodTypesExpanded} ) {
-                OutlinedTextField(
-                    value = selectedBloodType,
-                    onValueChange = {},
-                    label = { Text("Группа крови", fontSize = 10.sp) },
-                    readOnly = true,
-                    modifier = Modifier.menuAnchor(),
-                    shape = RoundedCornerShape(16.dp),
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = isBloodTypesExpanded
-                        )})
+                    trailingIcon = {if (selectedDate.isNotEmpty()) IconButton(onClick = { onSelectedDateChange("") }) {
+                        Icon(Icons.Filled.Clear, contentDescription = null)
+                    } else null})}
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                ExposedDropdownMenuBox(expanded = isBloodTypesExpanded, onExpandedChange = {isBloodTypesExpanded = !isBloodTypesExpanded} ) {
+                    OutlinedTextField(
+                        value = selectedBloodType,
+                        textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                        onValueChange = {},
+                        label = { Text("Группа крови",color = MaterialTheme.colorScheme.secondary, fontSize = 16.sp) },
+                        readOnly = true,
+                        modifier = Modifier.menuAnchor(),
+                        shape = RoundedCornerShape(16.dp),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = isBloodTypesExpanded
+                            )})
                 ExposedDropdownMenu(expanded = isBloodTypesExpanded, onDismissRequest = { /*TODO*/ }) {
                     bloodTypes.forEach { item ->  androidx.compose.material3.DropdownMenuItem(
-                        text = { Text(text = item) },
+                        text = { Text(text = item, color = MaterialTheme.colorScheme.secondary) },
                         onClick = {
                             selectedBloodType = item
                             isBloodTypesExpanded = false})
                 }
-            }}
-            ExposedDropdownMenuBox(expanded = isEyeColorsExpanded, onExpandedChange = {isEyeColorsExpanded = !isEyeColorsExpanded} ) {
-                OutlinedTextField(
-                    value = selectedEyeColor,
-                    onValueChange = {},
-                    label = { Text("Цвет глаз", fontSize = 10.sp) },
-                    readOnly = true,
-                    modifier = Modifier.menuAnchor(),
-                    shape = RoundedCornerShape(16.dp),
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = isEyeColorsExpanded
-                        )})
-                ExposedDropdownMenu(expanded = isEyeColorsExpanded, onDismissRequest = { /*TODO*/ }) {
-                    eyeColors.forEach { item ->  androidx.compose.material3.DropdownMenuItem(
-                        text = { Text(text = item) },
-                        onClick = {
-                            selectedEyeColor = item
-                            isEyeColorsExpanded = false})
-                    }
-                }}
-            Button(onClick = {
-                relativesListViewModel.addRelative(RelativesEntity(0,selectedName,selectedEyeColor,selectedHairColor,
-                    selectedDate, selectedBloodType))
-                selectedName = ""
-                selectedEyeColor = ""
-                selectedDate = ""
-                selectedBloodType = ""
-                selectedHairColor = ""
-                isAddMenuVisible = false }) {
-                Text(text = "Готово")
+            }}}
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                ExposedDropdownMenuBox(expanded = isEyeColorsExpanded, onExpandedChange = {isEyeColorsExpanded = !isEyeColorsExpanded} ) {
+                    OutlinedTextField(
+                        value = selectedEyeColor,
+                        textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                        onValueChange = {},
+                        label = { Text("Цвет глаз",color = MaterialTheme.colorScheme.secondary, fontSize = 16.sp) },
+                        readOnly = true,
+                        modifier = Modifier.menuAnchor(),
+                        shape = RoundedCornerShape(16.dp),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = isEyeColorsExpanded
+                            )})
+                    ExposedDropdownMenu(expanded = isEyeColorsExpanded, onDismissRequest = { /*TODO*/ }) {
+                        eyeColors.forEach { item ->  androidx.compose.material3.DropdownMenuItem(
+                            text = { Text(text = item, color = MaterialTheme.colorScheme.secondary) },
+                            onClick = {
+                                selectedEyeColor = item
+                                isEyeColorsExpanded = false})
+                        }
+                    }}}
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp), horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Button(onClick = {
+                    relativesListViewModel.addRelative(RelativesEntity(0,selectedName,selectedEyeColor,selectedHairColor,
+                        selectedDate, selectedBloodType))
+                    selectedName = ""
+                    selectedEyeColor = ""
+                    selectedDate = ""
+                    selectedBloodType = ""
+                    selectedHairColor = ""
+                    isAddMenuVisible = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .padding(start = 48.dp, end = 48.dp),
+
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "Готово",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+
             }
         }
     }
