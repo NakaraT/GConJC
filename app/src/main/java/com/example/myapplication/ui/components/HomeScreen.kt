@@ -127,8 +127,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
             Button(
                 onClick =
                 {
-                    /* Обработка нажатия */
-
+                    navController.navigate("hair")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

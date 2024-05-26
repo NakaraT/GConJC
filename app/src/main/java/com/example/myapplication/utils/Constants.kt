@@ -16,10 +16,10 @@ object Constants {
         BottomNavItem(
             label = "Главная",
             icon = Icons.Filled.Home,
-            route = "home"
+            route = "home",
         ),
         BottomNavItem(
-            label = "Информация",
+            label = "Данные",
             icon = Icons.Filled.Person,
             route = "information"
         ),

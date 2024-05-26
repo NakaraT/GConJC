@@ -126,13 +126,13 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         .weight(1f)
                 ) {
                     Text(
-                        text = "Имя: ${relative.relativeName}",
+                        text = "Имя:\n${relative.relativeName}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
-                        text = "Дата рождения: ${relative.dateofBirth}",
+                        text = "Дата рождения:\n${relative.dateofBirth}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.secondary,

@@ -33,6 +33,7 @@ import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
 import com.example.myapplication.ui.components.DashboardScreen
 import com.example.myapplication.ui.components.DashboardViewModelFactory
 import com.example.myapplication.ui.components.EyesScreen
+import com.example.myapplication.ui.components.HairScreen
 import com.example.myapplication.ui.components.HomeScreen
 import com.example.myapplication.ui.components.InformationScreen
 import com.example.myapplication.ui.components.NewsScreen
@@ -111,6 +112,9 @@ fun NavHostContainer(
             composable("eyes") {
                 EyesScreen()
             }
+            composable("hair") {
+                HairScreen()
+            }
         }
     )
 }
@@ -132,7 +136,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                     Icon(imageVector = navItem.icon, contentDescription = navItem.label)
                 },
                 label = {
-                    Text(text = navItem.label)
+                    Text(text = navItem.label, color = MaterialTheme.colorScheme.secondary)
                 },
                 alwaysShowLabel = false
             )

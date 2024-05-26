@@ -72,10 +72,13 @@ fun NewsScreen(sharedPreferences: SharedPreferences) {
     }
 
     val trailingIconView = @Composable {
-        IconButton(onClick = {
+        IconButton(
+
+            onClick = {
             searchText.value = ""
             filteredNewsList.value = newsList.value
         }) {
+
             Icon(Icons.Filled.Close, contentDescription = "Close Button", modifier = Modifier.size(25.dp), tint = Color.Black)
         }
     }
@@ -99,7 +102,7 @@ fun NewsScreen(sharedPreferences: SharedPreferences) {
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
-//                CustomLinearProgressBar()
+
                 Row (verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -145,6 +148,9 @@ fun NewsScreen(sharedPreferences: SharedPreferences) {
                             Text(text = item)
                         }, onClick = {
                             searchText.value = item // Обработка выбора элемента
+                            filteredNewsList.value = newsList.value.filter {
+                                it.contains(searchText.value, true)
+                            }
                             expanded.value = false // Скрытие меню
                         })
                     }
@@ -204,7 +210,8 @@ private fun CustomCircularProgressBar(){
 fun NewsItem(newsItem: String) {
     Card(
         modifier = Modifier.padding(8.dp),
-        elevation = 4.dp
+        elevation = 4.dp,
+        backgroundColor = MaterialTheme.colorScheme.inverseOnSurface
     ) {
         Text(
             text = newsItem,
