@@ -160,8 +160,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
             Button(
                 onClick =
                 {
-                    /* Обработка нажатия */
-
+                    navController.navigate("blood")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -194,8 +193,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
             Button(
                 onClick =
                 {
-                    /* Обработка нажатия */
-
+                    navController.navigate("hand")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

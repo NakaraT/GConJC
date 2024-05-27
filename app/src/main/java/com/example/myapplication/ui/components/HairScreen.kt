@@ -131,15 +131,22 @@ fun HairColorDropdown(label: String, selectedColor: String, onColorSelected: (St
 
 fun calculateHairProbability(fatherHairColor: String, motherHairColor: String): String {
     return when {
-        fatherHairColor == "Карий" && motherHairColor == "Карий" -> "75% Карие\n18,75% Голубые\n6,25% Зелёные"
-        fatherHairColor == "Голубой" && motherHairColor == "Голубой" -> "0% Карие\n99% Голубые\n1% Зелёные"
-        fatherHairColor == "Зелёный" && motherHairColor == "Зелёный" -> "1% Карие\n24% Голубые\n75% Зелёные"
-        fatherHairColor == "Зелёный" && motherHairColor == "Карий" -> "50% Карие\n37,5% Голубые\n12,5% Зелёные"
-        fatherHairColor == "Карий" && motherHairColor == "Зелёный" -> "50% Карие\n37,5% Голубые\n12,5% Зелёные"
-        fatherHairColor == "Карий" && motherHairColor == "Голубой" -> "50% Карие\n50% Голубые\n0% Зелёные"
-        fatherHairColor == "Голубой" && motherHairColor == "Карий" -> "50% Карие\n50% Голубые\n0% Зелёные"
-        fatherHairColor == "Голубой" && motherHairColor == "Зелёный" -> "0% Карие\n50% Голубые\n50% Зелёные"
-        fatherHairColor == "Зелёный" && motherHairColor == "Голубой" -> "0% Карие\n50% Голубые\n50% Зелёные"
+        fatherHairColor == "Светлый" && motherHairColor == "Светлый" -> "85,3% Светлый\n5,7% Коричневый\n2,5% Рыжий\n6,5% Черный"
+        fatherHairColor == "Светлый" && motherHairColor == "Коричневый" -> "23,2% Светлый\n67,4% Коричневый\n2,7% Рыжий\n6,7% Черный"
+        fatherHairColor == "Светлый" && motherHairColor == "Рыжий" -> "13,1% Светлый\n36,4% Коричневый\n44% Рыжий\n6,5% Черный"
+        fatherHairColor == "Светлый" && motherHairColor == "Черный" -> "7,8% Светлый\n6,7% Коричневый\n2,5% Рыжий\n83% Черный"
+        fatherHairColor == "Коричневый" && motherHairColor == "Светлый" -> "23,2% Светлый\n67,4% Коричневый\n2,7% Рыжий\n6,7% Черный"
+        fatherHairColor == "Коричневый" && motherHairColor == "Коричневый" -> "7,9% Светлый\n82,6% Коричневый\n2,7% Рыжий\n6,7% Черный"
+        fatherHairColor == "Коричневый" && motherHairColor == "Рыжий" -> "10,7% Светлый\n59,7% Коричневый\n23,2% Рыжий\n6,5% Черный"
+        fatherHairColor == "Коричневый" && motherHairColor == "Черный" -> "5,1% Светлый\n12,8% Коричневый\n2,5% Рыжий\n79,6% Черный"
+        fatherHairColor == "Рыжий" && motherHairColor == "Светлый" -> "13,1% Светлый\n36,4% Коричневый\n44% Рыжий\n6,5% Черный"
+        fatherHairColor == "Рыжий" && motherHairColor == "Коричневый" -> "10,7% Светлый\n59,7% Коричневый\n23,2% Рыжий\n6,5% Черный"
+        fatherHairColor == "Рыжий" && motherHairColor == "Рыжий" ->"6,9% Светлый\n31,9% Коричневый\n50,7% Рыжий\n10,5% Черный"
+        fatherHairColor == "Рыжий" && motherHairColor == "Черный" -> "3,2% Светлый\n7,4% Коричневый\n6,5% Рыжий\n83% Черный"
+        fatherHairColor == "Черный" && motherHairColor == "Светлый" -> "7,8% Светлый\n6,7% Коричневый\n2,5% Рыжий\n83% Черный"
+        fatherHairColor == "Черный" && motherHairColor == "Коричневый" -> "5,1% Светлый\n12,8% Коричневый\n2,5% Рыжий\n79,6% Черный"
+        fatherHairColor == "Черный" && motherHairColor == "Рыжий" -> "3,2% Светлый\n7,4% Коричневый\n6,5% Рыжий\n83% Черный"
+        fatherHairColor == "Черный" && motherHairColor == "Черный" -> "3% Светлый\n5,7% Коричневый\n2,5% Рыжий\n88,8% Черный"
         else -> "Пожалуйста, укажите цвет волос обоих родителей для рассчета вероятности."
     }
 }
