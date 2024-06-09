@@ -1,26 +1,13 @@
 package com.example.geneticcalc.data.repositories
 
 
-import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.room.Dao
-import com.example.geneticcalc.data.API.RetrofitFactory
-import com.example.geneticcalc.data.API.TypeCodeAPI
 import com.example.geneticcalc.data.database.dao.RelativesProfilesDao
 import com.example.geneticcalc.data.database.entity.RelativesEntity
 //import com.example.geneticcalc.data.datasourse.RelativesDataSource
-import com.example.geneticcalc.data.models.PlaceholderPost
-import com.example.geneticcalc.data.protocols.RelativesProtocol
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
 
 
 class RelativesRepository(private val relativesDao: RelativesProfilesDao)
@@ -34,9 +21,9 @@ class RelativesRepository(private val relativesDao: RelativesProfilesDao)
         }
     }
 
-    fun updateRelative(relative: RelativesEntity){
+    fun updateRelative(newName: String, newEye: String, newHair: String, newDate: String, newBlood: String, id: Int){
         coroutineScope.launch(Dispatchers.IO) {
-            relativesDao.update(relative)
+            relativesDao.update(newName, newEye, newHair, newDate, newBlood, id)
         }
     }
 
@@ -57,5 +44,5 @@ class RelativesRepository(private val relativesDao: RelativesProfilesDao)
             relativesDao.deleteAll()
         }
     }
-
 }
+

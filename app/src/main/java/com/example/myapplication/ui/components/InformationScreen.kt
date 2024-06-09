@@ -1,10 +1,7 @@
 package com.example.myapplication.ui.components
 
 import android.app.Application
-import android.app.DatePickerDialog
-import android.widget.CalendarView
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,11 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Clear
@@ -42,16 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.geneticcalc.data.database.entity.RelativesEntity
@@ -66,17 +57,20 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
     var selectedName by remember { mutableStateOf("")}
     var selectedHairColor by remember { mutableStateOf("")}
     var selectedDate by remember { mutableStateOf("")}
+    var selectedId by remember { mutableStateOf(0)}
     val onSelectedNameChange = { text: String -> selectedName = text }
     val onSelectedHairColorChange = { text: String -> selectedHairColor = text }
     val onSelectedDateChange = { text: String -> selectedDate = text }
     var selectedEyeColor by remember { mutableStateOf("")}
     var selectedBloodType by remember { mutableStateOf("")}
-    val bloodTypes = arrayOf("I+", "I-", "II+", "II-", "III+", "III-", "III+", "IV+", "IV-")
+    val bloodTypes = arrayOf("I+", "I-", "II+", "II-", "III+", "III-", "IV+", "IV-")
     val eyeColors = arrayOf("Голубые", "Карие", "Серые", "Зелёные")
     var isBloodTypesExpanded by remember { mutableStateOf(false)}
     var isEyeColorsExpanded by remember { mutableStateOf(false)}
     var isAddMenuVisible by remember { mutableStateOf(false)}
-    var isDateExpanded by remember { mutableStateOf(false)}
+    var openedForEditing by remember { mutableStateOf(false)}
+
+
     if (!isAddMenuVisible) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -96,7 +90,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                 )
             }
         }
-            //asd
+
         items(allRelatives) { relative ->
             Row(
                 modifier = Modifier
@@ -108,8 +102,9 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         selectedBloodType = relative.bloodType
                         selectedEyeColor = relative.eyeColor
                         selectedHairColor = relative.hairColor
-                        relativesListViewModel.deleteRelative(relative.id)
+                        selectedId = relative.id
                         isAddMenuVisible = true
+                        openedForEditing = true
                     },
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -256,8 +251,14 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                     .padding(top = 32.dp), horizontalArrangement = Arrangement.SpaceAround
             ) {
                 Button(onClick = {
-                    relativesListViewModel.addRelative(RelativesEntity(0,selectedName,selectedEyeColor,selectedHairColor,
-                        selectedDate, selectedBloodType))
+                    if (openedForEditing){
+                        relativesListViewModel.updateRelative(selectedName,selectedEyeColor,
+                            selectedHairColor, selectedDate, selectedBloodType, selectedId)
+                        openedForEditing = false
+                    }
+                    else{
+                        relativesListViewModel.addRelative(RelativesEntity(0, selectedName,
+                            selectedEyeColor, selectedHairColor,selectedDate, selectedBloodType))}
                     selectedName = ""
                     selectedEyeColor = ""
                     selectedDate = ""
@@ -290,6 +291,5 @@ class RelativeListViewModelFactory(val application: Application):
         ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return RelativesListViewModel(application) as T
-    }
-        }
+    }}
 

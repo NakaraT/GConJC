@@ -16,15 +16,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.TextField
+import androidx.compose.material.MaterialTheme.colors
+import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,12 +37,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.utils.SEARCH_KEY
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsScreen(sharedPreferences: SharedPreferences) {
     val newsList = remember { mutableStateOf(listOf<String>()) }
@@ -79,7 +85,7 @@ fun NewsScreen(sharedPreferences: SharedPreferences) {
             filteredNewsList.value = newsList.value
         }) {
 
-            Icon(Icons.Filled.Close, contentDescription = "Close Button", modifier = Modifier.size(25.dp), tint = Color.Black)
+            Icon(Icons.Filled.Close, contentDescription = "Close Button", modifier = Modifier.size(25.dp), tint = MaterialTheme.colorScheme.secondary)
         }
     }
     Column(
@@ -118,7 +124,12 @@ fun NewsScreen(sharedPreferences: SharedPreferences) {
             Column {
                 TextField(
                     value = searchText.value,
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.secondary),
                     onValueChange = { searchText.value = it },
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                        focusedIndicatorColor = Color(255,255,255,alpha = 0),
+                        unfocusedIndicatorColor = Color(255,255,255,alpha = 0)),
                     modifier = Modifier.padding(16.dp),
                     placeholder = {
                         Text(

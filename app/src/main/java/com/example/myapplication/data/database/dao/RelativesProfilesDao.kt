@@ -23,9 +23,11 @@ interface RelativesProfilesDao {
     @Query("SELECT * FROM relatives WHERE :id = id")
     fun getItem(id: Int): RelativesEntity
 
-    @Update
-    fun update(relative: RelativesEntity)
+    @Query("UPDATE relatives SET relativeName = :newName, eyeColor = :newEye, hairColor = :newHair," +
+            "dateofBirth = :newDate, bloodType =:newBlood WHERE id = :id")
+    fun update(newName: String, newEye: String, newHair: String, newDate: String, newBlood: String, id: Int)
 
     @Query("DELETE FROM relatives")
     fun deleteAll()
 }
+

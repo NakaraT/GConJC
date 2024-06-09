@@ -27,8 +27,8 @@ class RelativesListViewModel(application: Application) : ViewModel() {
         repository.deleteRelative(relativeId)
     }
 
-    fun updateRelative(relative: RelativesEntity){
-        repository.updateRelative(relative)
+    fun updateRelative(newName: String, newEye: String, newHair: String, newDate: String, newBlood: String, id: Int){
+        repository.updateRelative(newName, newEye, newHair, newDate, newBlood, id)
     }
 
     fun findRelative(relativeId: Int){

@@ -16,3 +16,4 @@ data class RelativesEntity(
     var dateofBirth: String = "",
     var bloodType: String = ""
 )
+

@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.myapplication.ui.components
 
 import android.app.Application
 import android.content.SharedPreferences
@@ -30,16 +30,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.geneticcalc.ui.stateholder.viewModels.DashboardViewModel
 import com.example.geneticcalc.ui.stateholder.viewModels.HomeViewModel
 import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
-import com.example.myapplication.ui.components.BloodScreen
-import com.example.myapplication.ui.components.DashboardScreen
-import com.example.myapplication.ui.components.DashboardViewModelFactory
-import com.example.myapplication.ui.components.EyesScreen
-import com.example.myapplication.ui.components.HairScreen
-import com.example.myapplication.ui.components.HandScreen
-import com.example.myapplication.ui.components.HomeScreen
-import com.example.myapplication.ui.components.InformationScreen
-import com.example.myapplication.ui.components.NewsScreen
-import com.example.myapplication.ui.components.RelativeListViewModelFactory
 
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.utils.Constants
