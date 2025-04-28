@@ -1,233 +1,244 @@
 package com.example.myapplication.ui.components
 
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme.colors
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.contentColorFor
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.utils.SEARCH_KEY
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
+data class NewsItemData(val title: String, val link: String)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsScreen(sharedPreferences: SharedPreferences) {
-    val newsList = remember { mutableStateOf(listOf<String>()) }
+    val newsList = remember { mutableStateOf(listOf<NewsItemData>()) }
     val searchText = rememberSaveable { mutableStateOf("") }
-    val filteredNewsList = remember { mutableStateOf(newsList.value) }
+    val filteredNewsList = remember { mutableStateOf(listOf<NewsItemData>()) }
     val showClearButton = remember { mutableStateOf(false) }
     val expanded = remember { mutableStateOf(false) }
-    val items = sharedPreferences.getStringSet(SEARCH_KEY, mutableSetOf())
-    var localItems = mutableSetOf<String>()
+    val savedSearchQueries = sharedPreferences.getStringSet(SEARCH_KEY, mutableSetOf()) ?: mutableSetOf()
+    val localItems = remember { mutableStateOf(savedSearchQueries.toMutableSet()) }
+    val context = LocalContext.current
 
-    @Composable
-    fun addNews() {
-        rememberCoroutineScope().launch(Dispatchers.IO) {
-            try {
-                val document =
-                    Jsoup.connect("https://ria.ru/keyword_genetika/").get()
-                newsList.value = document
-                    .getElementsByClass("list-item__title color-font-hover-only")
-                    .map { it.text().toString() }
-            }
-            catch (e:Exception){
+    LaunchedEffect(Unit) {
+        loadNews(newsList)
+    }
 
+    LaunchedEffect(searchText.value) {
+        filteredNewsList.value = if (searchText.value.isEmpty()) {
+            newsList.value
+        } else {
+            newsList.value.filter {
+                it.title.contains(searchText.value, ignoreCase = true)
             }
         }
     }
-
-    addNews()
-
-    if (searchText.value.isEmpty()) {
-        filteredNewsList.value = newsList.value
-    }
-
-    val trailingIconView = @Composable {
-        IconButton(
-
-            onClick = {
-            searchText.value = ""
+    LaunchedEffect(newsList.value) {
+        if (searchText.value.isEmpty()) {
             filteredNewsList.value = newsList.value
-        }) {
-
-            Icon(Icons.Filled.Close, contentDescription = "Close Button", modifier = Modifier.size(25.dp), tint = MaterialTheme.colorScheme.secondary)
         }
     }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-
         if (newsList.value.isEmpty()) {
-            Column {
-                Row (verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Text(
-                        "Не удалось загрузить данные.",
-                        modifier = Modifier.padding(32.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Row (verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ){
-                    CustomCircularProgressBar()
-                }
-
-            }
-
+            EmptyState()
         } else {
-            Column {
-                TextField(
-                    value = searchText.value,
-                    textStyle = TextStyle(color = MaterialTheme.colorScheme.secondary),
-                    onValueChange = { searchText.value = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = MaterialTheme.colorScheme.inverseOnSurface,
-                        focusedIndicatorColor = Color(255,255,255,alpha = 0),
-                        unfocusedIndicatorColor = Color(255,255,255,alpha = 0)),
-                    modifier = Modifier.padding(16.dp),
-                    placeholder = {
-                        Text(
-                            "Поиск...",
-                            modifier = Modifier.clickable{ expanded.value = true },
-                            color = MaterialTheme.colorScheme.secondary) },
+            SearchBar(
+                searchText = searchText.value,
+                onTextChange = { newText -> searchText.value = newText },
+                onSearch = {
+                    localItems.value.add(searchText.value)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        sharedPreferences.edit().putStringSet(SEARCH_KEY, localItems.value).apply()
+                    }
+                    showClearButton.value = true
+                },
+                onClear = {
+                    searchText.value = ""
+                },
+                suggestions = localItems.value.toList(),
+                expanded = expanded
+            )
 
-                    singleLine = true,
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            if (searchText.value.isEmpty()) {
-                                filteredNewsList.value = newsList.value
-                            } else {
-                                filteredNewsList.value = newsList.value.filter {
-                                    it.contains(searchText.value, true)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (filteredNewsList.value.isEmpty()) {
+                Text(
+                    "Ничего не найдено.",
+                    modifier = Modifier.padding(32.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.Top,
+                    content = {
+                        items(filteredNewsList.value, key = { it.link }) { newsItem ->
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = fadeIn() + expandVertically()
+                            ) {
+                                NewsItem(newsItem) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(newsItem.link))
+                                    context.startActivity(intent)
                                 }
-                                localItems.add(searchText.value)
-                                sharedPreferences.edit().putStringSet(SEARCH_KEY, localItems).apply()
-                                showClearButton.value = true
                             }
                         }
-                    ), trailingIcon = if (!searchText.value.isEmpty()) trailingIconView else null
+                    }
                 )
-                DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
-                    items?.forEach { item ->
-                        DropdownMenuItem(text = {
-                            Text(text = item)
-                        }, onClick = {
-                            searchText.value = item // Обработка выбора элемента
-                            filteredNewsList.value = newsList.value.filter {
-                                it.contains(searchText.value, true)
-                            }
-                            expanded.value = false // Скрытие меню
-                        })
-                    }
-                }
             }
-        }
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (filteredNewsList.value.isEmpty()) {
-            Text("Ничего не найдено.",
-                modifier = Modifier.padding(32.dp),
-                color = MaterialTheme.colorScheme.primary)
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(0.dp),
-                verticalArrangement = Arrangement.Top,
-                content = {
-                    items(filteredNewsList.value) { newsItem ->
-                        NewsItem(newsItem)
-                    }
-                }
-            )
         }
     }
 }
 
-//@Composable
-//private fun CustomLinearProgressBar(){
-//    Column(modifier = Modifier.fillMaxWidth()) {
-//        LinearProgressIndicator(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(15.dp),
-//            backgroundColor = Color.LightGray,
-//            color = colorScheme.primary
-//        )
-//    }
-//}
-
-@Composable
-private fun CustomCircularProgressBar(){
-    CircularProgressIndicator(
-        modifier = Modifier.size(64.dp),
-        color = MaterialTheme.colorScheme.primary,
-        strokeWidth = 10.dp)
-
+private fun loadNews(newsList: MutableState<List<NewsItemData>>) {
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val document = Jsoup.connect("https://ria.ru/keyword_genetika/").get()
+            val loadedNews = document
+                .getElementsByClass("list-item__title color-font-hover-only")
+                .map { element ->
+                    val title = element.text()
+                    val link = element.attr("href")
+                    val fullLink = if (link.startsWith("http")) link else "https://ria.ru$link"
+                    NewsItemData(title, fullLink)
+                }
+            newsList.value = loadedNews
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
 
-
-
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBar(
+    searchText: String,
+    onTextChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    onClear: () -> Unit,
+    suggestions: List<String>,
+    expanded: MutableState<Boolean>
+) {
+    Column {
+        TextField(
+            value = searchText,
+            textStyle = TextStyle(color = MaterialTheme.colorScheme.secondary),
+            onValueChange = { onTextChange(it) },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = MaterialTheme.colorScheme.inverseOnSurface,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            modifier = Modifier.padding(16.dp),
+            placeholder = {
+                Text(
+                    "Поиск...",
+                    modifier = Modifier.clickable { expanded.value = true },
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            },
+            singleLine = true,
+            keyboardActions = KeyboardActions(
+                onDone = { onSearch() }
+            ),
+            trailingIcon = {
+                if (searchText.isNotEmpty()) {
+                    IconButton(onClick = onClear) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "Close Button",
+                            modifier = Modifier.size(25.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+        )
+        DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
+            suggestions.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = item) },
+                    onClick = {
+                        onTextChange(item)
+                        expanded.value = false
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Composable
-fun NewsItem(newsItem: String) {
+fun NewsItem(newsItem: NewsItemData, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.padding(8.dp),
-        elevation = 4.dp,
-        backgroundColor = MaterialTheme.colorScheme.inverseOnSurface
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.inverseOnSurface)
     ) {
         Text(
-            text = newsItem,
+            text = newsItem.title,
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.primary
         )
     }
+}
+
+@Composable
+fun EmptyState() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            "Не удалось загрузить данные.",
+            modifier = Modifier.padding(32.dp),
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        CustomCircularProgressBar()
+    }
+}
+
+@Composable
+private fun CustomCircularProgressBar() {
+    CircularProgressIndicator(
+        modifier = Modifier.size(64.dp),
+        color = MaterialTheme.colorScheme.primary,
+        strokeWidth = 10.dp
+    )
 }
