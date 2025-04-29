@@ -155,11 +155,6 @@ fun SearchBar(
             value = searchText,
             textStyle = TextStyle(color = MaterialTheme.colorScheme.secondary),
             onValueChange = { onTextChange(it) },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.inverseOnSurface,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
             modifier = Modifier.padding(16.dp),
             placeholder = {
                 Text(
