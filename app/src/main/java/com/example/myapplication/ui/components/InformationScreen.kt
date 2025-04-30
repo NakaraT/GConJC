@@ -34,9 +34,11 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.remember
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.res.colorResource
 import androidx.lifecycle.ViewModelProvider
 import com.example.geneticcalc.data.database.entity.RelativesEntity
 import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
+import com.example.myapplication.R
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -167,13 +169,14 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                                 text = color,
                                 isSelected = selectedHairColor == color,
                                 color = when (color) {
-                                    "Светлый" -> Color(0xFFE6D5A1)
-                                    "Карий" -> Color(0xFF5B381E)
-                                    "Рыжий" -> Color(0xFFD2691E)
-                                    else -> Color(0xFF211E1C)
+                                    "Светлый" -> colorResource(id = R.color.light_hair)
+                                    "Карий" -> colorResource(id = R.color.brown_hair)
+                                    "Рыжий" -> colorResource(id = R.color.red_hair)
+                                    "Тёмный" -> colorResource(id = R.color.dark_hair)
+                                    else -> colorResource(id = R.color.default_circle)
                                 },
                                 onClick = { selectedHairColor = color },
-                                modifier = Modifier.weight(1f) // Растягиваем элемент по ширине
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -187,13 +190,14 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                                 text = color,
                                 isSelected = selectedHairColor == color,
                                 color = when (color) {
-                                    "Светлый" -> Color(0xFFE6D5A1)
-                                    "Карий" -> Color(0xFF5B381E)
-                                    "Рыжий" -> Color(0xFFD2691E)
-                                    else -> Color(0xFF211E1C)
+                                    "Светлый" -> colorResource(id = R.color.light_hair)
+                                    "Карий" -> colorResource(id = R.color.brown_hair)
+                                    "Рыжий" -> colorResource(id = R.color.red_hair)
+                                    "Тёмный" -> colorResource(id = R.color.dark_hair)
+                                    else -> colorResource(id = R.color.default_circle)
                                 },
                                 onClick = { selectedHairColor = color },
-                                modifier = Modifier.weight(1f) // Растягиваем элемент по ширине
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -221,7 +225,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                                 isSelected = selectedBloodType == type,
                                 color = null,
                                 onClick = { selectedBloodType = type },
-                                modifier = Modifier.width(80.dp) // Фиксированная ширина для кнопок группы крови
+                                modifier = Modifier.width(80.dp)
                             )
                         }
                     }
@@ -236,7 +240,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                                 isSelected = selectedBloodType == type,
                                 color = null,
                                 onClick = { selectedBloodType = type },
-                                modifier = Modifier.width(80.dp) // Фиксированная ширина для кнопок группы крови
+                                modifier = Modifier.width(80.dp)
                             )
                         }
                     }
@@ -321,13 +325,15 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                                 text = color,
                                 isSelected = selectedEyeColor == color,
                                 color = when (color) {
-                                    "Голубые" -> Color(0xFF15AAE5)
-                                    "Карие" -> Color(0xFF60391C)
-                                    "Серые" -> Color(0xFFB2B2B2)
-                                    else -> Color(0xFF23DA23)
+                                    "Голубые" -> colorResource(id = R.color.blue_eye)
+                                    "Карие" -> colorResource(id = R.color.brown_eye)
+                                    "Серые" -> colorResource(id = R.color.gray_eye)
+                                    "Зелёные" -> colorResource(id = R.color.green_eye)
+                                    else -> colorResource(id = R.color.default_circle)
                                 },
+
                                 onClick = { selectedEyeColor = color },
-                                modifier = Modifier.weight(1f) // Растягиваем элемент по ширине
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -341,19 +347,20 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                                 text = color,
                                 isSelected = selectedEyeColor == color,
                                 color = when (color) {
-                                    "Голубые" -> Color(0xFF15AAE5)
-                                    "Карие" -> Color(0xFF60391C)
-                                    "Серые" -> Color(0xFFB2B2B2)
-                                    else -> Color(0xFF23DA23)
+                                    "Голубые" -> colorResource(id = R.color.blue_eye)
+                                    "Карие" -> colorResource(id = R.color.brown_eye)
+                                    "Серые" -> colorResource(id = R.color.gray_eye)
+                                    "Зелёные" -> colorResource(id = R.color.green_eye)
+                                    else -> colorResource(id = R.color.default_circle)
                                 },
                                 onClick = { selectedEyeColor = color },
-                                modifier = Modifier.weight(1f) // Растягиваем элемент по ширине
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(80.dp)) // Отступ для кнопки
+                Spacer(modifier = Modifier.height(80.dp))
             }
 
             FloatingActionButton(
@@ -399,7 +406,7 @@ fun SelectableItem(
     isSelected: Boolean,
     color: Color?,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier // Добавляем параметр modifier для гибкости
+    modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(if (isSelected) 1.05f else 1f)
 
@@ -496,10 +503,11 @@ fun RelativeCard(
                                 .clip(CircleShape)
                                 .background(
                                     when (relative.eyeColor) {
-                                        "Голубые" -> Color(0xFF15AAE5)
-                                        "Карие" -> Color(0xFF60391C)
-                                        "Серые" -> Color(0xFFB2B2B2)
-                                        else -> Color(0xFF23DA23)
+                                        "Голубые" -> colorResource(id = R.color.blue_eye)
+                                        "Карие" -> colorResource(id = R.color.brown_eye)
+                                        "Серые" -> colorResource(id = R.color.gray_eye)
+                                        "Зелёные" -> colorResource(id = R.color.green_eye)
+                                        else -> colorResource(id = R.color.default_circle)
                                     }
                                 )
                         )
@@ -517,10 +525,11 @@ fun RelativeCard(
                                 .clip(CircleShape)
                                 .background(
                                     when (relative.hairColor) {
-                                        "Светлый" -> Color(0xFFE6D5A1)
-                                        "Карий" -> Color(0xFF5B381E)
-                                        "Рыжий" -> Color(0xFFD2691E)
-                                        else -> Color(0xFF211E1C)
+                                        "Светлый" -> colorResource(id = R.color.light_hair)
+                                        "Карий" -> colorResource(id = R.color.brown_hair)
+                                        "Рыжий" -> colorResource(id = R.color.red_hair)
+                                        "Тёмный" -> colorResource(id = R.color.dark_hair)
+                                        else -> colorResource(id = R.color.default_circle)
                                     }
                                 )
                         )

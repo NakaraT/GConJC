@@ -7,5 +7,16 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="brown_eye">#5C4033</color>
+    <color name="blue_eye">#87CEEB</color>
+    <color name="green_eye">#3CB371</color>
+    <color name="gray_eye">#FFB2B2B2</color>
+    <color name="default_circle">#C0C0C0</color>
+    <color name="light_hair">#FFE6D5A1</color>
+    <color name="brown_hair">#FF5B381E</color>
+    <color name="red_hair">#FFD2691E</color>
+    <color name="dark_hair">#FF211E1C</color>
+
+
 </resources>
 
