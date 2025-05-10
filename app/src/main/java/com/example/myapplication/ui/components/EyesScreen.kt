@@ -2,17 +2,13 @@ package com.example.myapplication.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,11 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
-import com.example.myapplication.ui.theme.MyApplicationTheme
 
 @Composable
 fun EyesScreen() {
-    val colors = listOf("Карий", "Зелёный", "Голубой")
     val fatherEyeColor = remember { mutableStateOf("Неизвестно") }
     val motherEyeColor = remember { mutableStateOf("Неизвестно") }
     val result = remember { mutableStateOf("") }
@@ -83,7 +77,7 @@ fun EyesScreen() {
                         color = MaterialTheme.colorScheme.primary
                     )
                 } else {
-                    ResultChances(result.value)
+                    ResultEyeChances(result.value)
                 }
             }
         }
@@ -112,7 +106,7 @@ fun EyeColorDropdown(label: String, selectedColor: String, onColorSelected: (Str
                 Box(
                     modifier = Modifier
                         .size(14.dp)
-                        .background(getColorFromName(selectedColor), CircleShape)
+                        .background(getEyeColorFromName(selectedColor), CircleShape)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -134,7 +128,7 @@ fun EyeColorDropdown(label: String, selectedColor: String, onColorSelected: (Str
                             Box(
                                 modifier = Modifier
                                     .size(12.dp)
-                                    .background(getColorFromName(color), CircleShape)
+                                    .background(getEyeColorFromName(color), CircleShape)
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(color, color = MaterialTheme.colorScheme.secondary)
@@ -151,7 +145,7 @@ fun EyeColorDropdown(label: String, selectedColor: String, onColorSelected: (Str
 }
 
 @Composable
-fun ResultChances(result: String) {
+fun ResultEyeChances(result: String) {
     val entries = result.split("\n").mapNotNull {
         val parts = it.split(" ")
         if (parts.size >= 2) {
@@ -180,7 +174,7 @@ fun ResultChances(result: String) {
                 Box(
                     modifier = Modifier
                         .size(14.dp)
-                        .background(getColorFromName(colorName), CircleShape)
+                        .background(getEyeColorFromName(colorName), CircleShape)
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -206,7 +200,7 @@ fun ResultChances(result: String) {
 
 
 @Composable
-fun getColorFromName(color: String): Color {
+fun getEyeColorFromName(color: String): Color {
     return when (color) {
         "Карий", "Карие" -> colorResource(id = R.color.brown_eye)
         "Голубые", "Голубой" -> colorResource(id = R.color.blue_eye)

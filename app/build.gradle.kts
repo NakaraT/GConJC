@@ -75,6 +75,7 @@ dependencies {
 
     // Навигация
     implementation("androidx.navigation:navigation-compose:2.8.3")
+    implementation("androidx.test.espresso:espresso-core:3.6.1")
 
     // Room
     val room_version = "2.6.1"
