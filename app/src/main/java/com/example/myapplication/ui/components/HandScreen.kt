@@ -27,6 +27,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.utils.calculateHandProbability
 
 @Composable
 fun HandScreen() {
@@ -126,15 +127,5 @@ fun HandDropdown(label: String, selectedHand: String, onHandSelected: (String) -
                 }
             }
         }
-    }
-}
-
-fun calculateHandProbability(fatherHand: String, motherHand: String): String {
-    return when {
-        fatherHand == "Левша" && motherHand == "Левша" -> "80% Правша\n20% Левша"
-        fatherHand == "Левша" && motherHand == "Правша" -> "88% Правша\n12% Левша"
-        fatherHand == "Правша" && motherHand == "Левша" -> "84% Правша\n16% Левша"
-        fatherHand == "Правша" && motherHand == "Правша" -> "91% Правша\n9% Левша"
-        else -> "Пожалуйста, укажите основные руки обоих родителей для рассчета вероятности."
     }
 }

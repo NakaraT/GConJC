@@ -36,6 +36,8 @@ import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import com.example.myapplication.R
+import com.example.myapplication.utils.calculateHairProbability
+import com.example.myapplication.utils.getHairColorFromName
 
 @Composable
 fun HairScreen() {
@@ -213,38 +215,5 @@ fun ResultHairChances(result: String) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun getHairColorFromName(color: String): Color {
-    return when (color) {
-        "Светлый" -> colorResource(id = R.color.light_hair)
-        "Коричневый" -> colorResource(id = R.color.brown_hair)
-        "Рыжий" -> colorResource(id = R.color.red_hair)
-        "Черный" -> colorResource(id = R.color.dark_hair)
-        else -> colorResource(id = R.color.default_circle)
-    }
-}
-
-fun calculateHairProbability(fatherHairColor: String, motherHairColor: String): String {
-    return when {
-        fatherHairColor == "Светлый" && motherHairColor == "Светлый" -> "85,3% Светлый\n5,7% Коричневый\n2,5% Рыжий\n6,5% Черный"
-        fatherHairColor == "Светлый" && motherHairColor == "Коричневый" -> "23,2% Светлый\n67,4% Коричневый\n2,7% Рыжий\n6,7% Черный"
-        fatherHairColor == "Светлый" && motherHairColor == "Рыжий" -> "13,1% Светлый\n36,4% Коричневый\n44% Рыжий\n6,5% Черный"
-        fatherHairColor == "Светлый" && motherHairColor == "Черный" -> "7,8% Светлый\n6,7% Коричневый\n2,5% Рыжий\n83% Черный"
-        fatherHairColor == "Коричневый" && motherHairColor == "Светлый" -> "23,2% Светлый\n67,4% Коричневый\n2,7% Рыжий\n6,7% Черный"
-        fatherHairColor == "Коричневый" && motherHairColor == "Коричневый" -> "7,9% Светлый\n82,6% Коричневый\n2,7% Рыжий\n6,7% Черный"
-        fatherHairColor == "Коричневый" && motherHairColor == "Рыжий" -> "10,7% Светлый\n59,7% Коричневый\n23,2% Рыжий\n6,5% Черный"
-        fatherHairColor == "Коричневый" && motherHairColor == "Черный" -> "5,1% Светлый\n12,8% Коричневый\n2,5% Рыжий\n79,6% Черный"
-        fatherHairColor == "Рыжий" && motherHairColor == "Светлый" -> "13,1% Светлый\n36,4% Коричневый\n44% Рыжий\n6,5% Черный"
-        fatherHairColor == "Рыжий" && motherHairColor == "Коричневый" -> "10,7% Светлый\n59,7% Коричневый\n23,2% Рыжий\n6,5% Черный"
-        fatherHairColor == "Рыжий" && motherHairColor == "Рыжий" ->"6,9% Светлый\n31,9% Коричневый\n50,7% Рыжий\n10,5% Черный"
-        fatherHairColor == "Рыжий" && motherHairColor == "Черный" -> "3,2% Светлый\n7,4% Коричневый\n6,5% Рыжий\n83% Черный"
-        fatherHairColor == "Черный" && motherHairColor == "Светлый" -> "7,8% Светлый\n6,7% Коричневый\n2,5% Рыжий\n83% Черный"
-        fatherHairColor == "Черный" && motherHairColor == "Коричневый" -> "5,1% Светлый\n12,8% Коричневый\n2,5% Рыжий\n79,6% Черный"
-        fatherHairColor == "Черный" && motherHairColor == "Рыжий" -> "3,2% Светлый\n7,4% Коричневый\n6,5% Рыжий\n83% Черный"
-        fatherHairColor == "Черный" && motherHairColor == "Черный" -> "3% Светлый\n5,7% Коричневый\n2,5% Рыжий\n88,8% Черный"
-        else -> "Пожалуйста, укажите цвет волос обоих родителей для рассчета вероятности."
     }
 }

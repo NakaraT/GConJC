@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
+import com.example.myapplication.utils.calculateEyeProbability
+import com.example.myapplication.utils.getEyeColorFromName
 
 @Composable
 fun EyesScreen() {
@@ -195,31 +197,5 @@ fun ResultEyeChances(result: String) {
                 )
             }
         }
-    }
-}
-
-
-@Composable
-fun getEyeColorFromName(color: String): Color {
-    return when (color) {
-        "Карий", "Карие" -> colorResource(id = R.color.brown_eye)
-        "Голубые", "Голубой" -> colorResource(id = R.color.blue_eye)
-        "Зелёные", "Зелёный" -> colorResource(id = R.color.green_eye)
-        else -> colorResource(id = R.color.default_circle)
-    }
-}
-
-fun calculateEyeProbability(fatherEyeColor: String, motherEyeColor: String): String {
-    return when {
-        fatherEyeColor == "Карий" && motherEyeColor == "Карий" -> "75% Карие\n18,75% Голубые\n6,25% Зелёные"
-        fatherEyeColor == "Голубой" && motherEyeColor == "Голубой" -> "<1% Карие\n99% Голубые\n1% Зелёные"
-        fatherEyeColor == "Зелёный" && motherEyeColor == "Зелёный" -> "1% Карие\n24% Голубые\n75% Зелёные"
-        fatherEyeColor == "Зелёный" && motherEyeColor == "Карий" -> "50% Карие\n37,5% Голубые\n12,5% Зелёные"
-        fatherEyeColor == "Карий" && motherEyeColor == "Зелёный" -> "50% Карие\n37,5% Голубые\n12,5% Зелёные"
-        fatherEyeColor == "Карий" && motherEyeColor == "Голубой" -> "50% Карие\n50% Голубые\n<1% Зелёные"
-        fatherEyeColor == "Голубой" && motherEyeColor == "Карий" -> "50% Карие\n50% Голубые\n<1% Зелёные"
-        fatherEyeColor == "Голубой" && motherEyeColor == "Зелёный" -> "<1% Карие\n50% Голубые\n50% Зелёные"
-        fatherEyeColor == "Зелёный" && motherEyeColor == "Голубой" -> "<1% Карие\n50% Голубые\n50% Зелёные"
-        else -> "Пожалуйста, выберите цвет глаз обоих родителей."
     }
 }
