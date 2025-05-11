@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,23 +31,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.remember
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import com.example.geneticcalc.data.database.entity.RelativesEntity
 import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
 import com.example.myapplication.R
+import com.example.myapplication.utils.BloodTypes
+import com.example.myapplication.utils.Relative
+import com.example.myapplication.utils.sharedViewModel
+import com.example.myapplication.utils.toRelativeEntity
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
-    val allRelatives by relativesListViewModel.allRelatives.observeAsState()
+fun InformationScreen(navController: NavController) {
+
+    val viewModel = sharedViewModel<RelativesListViewModel>(navController)
+    viewModel.getRelatives()
+    val allRelatives = viewModel.allRelatives.collectAsState().value
 
     var selectedName by remember { mutableStateOf("") }
     var selectedHairColor by remember { mutableStateOf("") }
@@ -53,15 +64,46 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
     var selectedId by remember { mutableStateOf(0) }
     var selectedEyeColor by remember { mutableStateOf("") }
     var selectedBloodType by remember { mutableStateOf("") }
+
     var isAddMenuVisible by remember { mutableStateOf(false) }
     var openedForEditing by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
-
-    val bloodTypes = arrayOf("I+", "I-", "II+", "II-", "III+", "III-", "IV+", "IV-")
-    val eyeColors = arrayOf("Голубые", "Карие", "Серые", "Зелёные")
-    val hairColors = arrayOf("Светлый", "Карий", "Рыжий", "Тёмный")
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var relativeToDelete by remember { mutableStateOf<RelativesEntity?>(null) }
 
     val dateFormatter = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
+    if (showDeleteDialog && relativeToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Подтверждение удаления", color = MaterialTheme.colorScheme.secondary) },
+            text = { Text("Вы уверены, что хотите удалить ${relativeToDelete?.relativeName}?", color = MaterialTheme.colorScheme.secondary) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        relativeToDelete?.let { viewModel.deleteRelative(it.id) }
+                        viewModel.getRelatives()
+                        showDeleteDialog = false
+                        relativeToDelete = null
+                    }
+                ) {
+                    Text("Удалить", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        relativeToDelete = null
+                    }
+                ) {
+                    Text("Отмена", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.background,
+            shape = RoundedCornerShape(12.dp)
+        )
+    }
 
     if (!isAddMenuVisible) {
         Column(
@@ -100,7 +142,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn {
-                items(allRelatives ?: emptyList()) { relative ->
+                items(allRelatives) { relative ->
                     RelativeCard(
                         relative = relative,
                         onEditClick = {
@@ -113,7 +155,10 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                             isAddMenuVisible = true
                             openedForEditing = true
                         },
-                        onDeleteClick = { relativesListViewModel.deleteRelative(relative.id) }
+                        onDeleteClick = {
+                            relativeToDelete = relative
+                            showDeleteDialog = true
+                        }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -145,7 +190,9 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                     modifier = Modifier
                         .fillMaxWidth(),
                     textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.secondary),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -164,7 +211,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        hairColors.take(2).forEach { color ->
+                        viewModel.hairColors.take(2).forEach { color ->
                             SelectableItem(
                                 text = color,
                                 isSelected = selectedHairColor == color,
@@ -185,7 +232,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        hairColors.drop(2).forEach { color ->
+                        viewModel.hairColors.drop(2).forEach { color ->
                             SelectableItem(
                                 text = color,
                                 isSelected = selectedHairColor == color,
@@ -219,7 +266,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        bloodTypes.take(4).forEach { type ->
+                        viewModel.bloodTypes.take(4).forEach { type ->
                             SelectableItem(
                                 text = type,
                                 isSelected = selectedBloodType == type,
@@ -234,7 +281,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        bloodTypes.drop(4).forEach { type ->
+                        viewModel.bloodTypes.drop(4).forEach { type ->
                             SelectableItem(
                                 text = type,
                                 isSelected = selectedBloodType == type,
@@ -320,7 +367,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        eyeColors.take(2).forEach { color ->
+                        viewModel.eyeColors.take(2).forEach { color ->
                             SelectableItem(
                                 text = color,
                                 isSelected = selectedEyeColor == color,
@@ -342,7 +389,7 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        eyeColors.drop(2).forEach { color ->
+                        viewModel.eyeColors.drop(2).forEach { color ->
                             SelectableItem(
                                 text = color,
                                 isSelected = selectedEyeColor == color,
@@ -366,18 +413,20 @@ fun InformationScreen(relativesListViewModel: RelativesListViewModel) {
             FloatingActionButton(
                 onClick = {
                     if (openedForEditing) {
-                        relativesListViewModel.updateRelative(
+                        viewModel.updateRelative(
                             selectedName, selectedEyeColor,
                             selectedHairColor, selectedDate, selectedBloodType, selectedId
                         )
+                        viewModel.getRelatives()
                         openedForEditing = false
                     } else {
-                        relativesListViewModel.addRelative(
+                        viewModel.addRelative(
                             RelativesEntity(
                                 0, selectedName,
                                 selectedEyeColor, selectedHairColor, selectedDate, selectedBloodType
                             )
                         )
+                        viewModel.getRelatives()
                     }
                     selectedName = ""
                     selectedEyeColor = ""
@@ -596,11 +645,5 @@ private suspend fun PointerInputScope.detectHover(onHover: (Boolean) -> Unit) {
                 PointerEventType.Exit -> onHover(false)
             }
         }
-    }
-}
-
-class RelativeListViewModelFactory(val application: Application) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return RelativesListViewModel(application) as T
     }
 }

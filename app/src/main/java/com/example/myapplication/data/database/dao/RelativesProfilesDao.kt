@@ -12,22 +12,22 @@ import com.example.geneticcalc.data.database.entity.RelativesEntity
 @Dao
 interface RelativesProfilesDao {
     @Query("SELECT * FROM relatives")
-    fun relativesList(): LiveData<List<RelativesEntity>>
+    suspend fun getAll(): List<RelativesEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(relativesEntity: RelativesEntity)
+    suspend fun insert(relativesEntity: RelativesEntity)
 
     @Query("DELETE FROM relatives WHERE :id = id")
-    fun delete(id: Int)
+    suspend fun delete(id: Int)
 
     @Query("SELECT * FROM relatives WHERE :id = id")
-    fun getItem(id: Int): RelativesEntity
+    suspend fun getItem(id: Int): RelativesEntity
 
     @Query("UPDATE relatives SET relativeName = :newName, eyeColor = :newEye, hairColor = :newHair," +
             "dateofBirth = :newDate, bloodType =:newBlood WHERE id = :id")
-    fun update(newName: String, newEye: String, newHair: String, newDate: String, newBlood: String, id: Int)
+    suspend fun update(newName: String, newEye: String, newHair: String, newDate: String, newBlood: String, id: Int)
 
     @Query("DELETE FROM relatives")
-    fun deleteAll()
+    suspend fun deleteAll()
 }
 

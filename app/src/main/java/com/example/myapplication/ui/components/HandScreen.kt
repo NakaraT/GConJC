@@ -1,29 +1,20 @@
 package com.example.myapplication.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,100 +22,148 @@ import com.example.myapplication.utils.calculateHandProbability
 
 @Composable
 fun HandScreen() {
-    val hands = listOf("Неизвестно", "Левша", "Правша")
-    val fatherHand = remember { mutableStateOf(hands[0]) }
-    val motherHand = remember { mutableStateOf(hands[0]) }
+    val fatherHand = remember { mutableStateOf("Неизвестно") }
+    val motherHand = remember { mutableStateOf("Неизвестно") }
     val result = remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 0.dp)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            "Левша или правша",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(Modifier.height(32.dp))
+
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 128.dp), horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Box(){
-                HandDropdown("Папа", fatherHand.value) { fatherHand.value = it }
-            }
-            Box() {
-                HandDropdown("Мама", motherHand.value) { motherHand.value = it }
-            }
+            HandDropdown("Папа", fatherHand.value) { fatherHand.value = it }
+            HandDropdown("Мама", motherHand.value) { motherHand.value = it }
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 32.dp)
-        ) {
-            Button(
-                onClick = {
-                    result.value = calculateHandProbability(
-                        fatherHand.value, motherHand.value
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .padding(start = 32.dp, end = 32.dp),
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                shape = RoundedCornerShape(12.dp)
-            )
-            {
-                Text(
-                    text = "Рассчитать вероятность",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary
+
+        Spacer(Modifier.height(32.dp))
+
+        Button(
+            onClick = {
+                result.value = calculateHandProbability(
+                    fatherHand.value,
+                    motherHand.value
                 )
-            }
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+            },
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp), horizontalArrangement = Arrangement.SpaceAround
+                .height(52.dp)
         ) {
-            Text("${result.value}",
-                modifier = Modifier.padding(vertical = 32.dp), fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.secondary,
-            )
+            Text("Рассчитать вероятность", fontSize = 18.sp, color = MaterialTheme.colorScheme.secondary)
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        if (result.value.isNotEmpty()) {
+            AnimatedVisibility(visible = true, enter = fadeIn()) {
+                if (result.value.contains("Пожалуйста")) {
+                    Text(
+                        result.value,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    ResultHandChances(result.value)
+                }
+            }
         }
     }
 }
 
-
 @Composable
-fun HandDropdown(label: String, selectedHand: String, onHandSelected: (String) -> Unit) {
-    val hands = listOf("Левша", "Правша")
+fun HandDropdown(label: String, selected: String, onSelect: (String) -> Unit) {
+    val options = listOf("Левша", "Правша")
     var expanded by remember { mutableStateOf(false) }
 
-    Column {
-        Text(label, fontSize = 20.sp, color = MaterialTheme.colorScheme.secondary,)
-        Box(contentAlignment = Alignment.CenterStart) {
-            val textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 20.sp
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, fontSize = 18.sp, color = MaterialTheme.colorScheme.secondary)
+
+        Spacer(Modifier.height(8.dp))
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .width(70.dp)
+        ) {
+            Text(
+                text = if (selected == "Неизвестно") "Выбрать" else selected,
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 16.sp
             )
+        }
 
-            Text(selectedHand, style = textStyle, modifier = Modifier.clickable { expanded = true })
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                hands.forEach { hand ->
-                    DropdownMenuItem(onClick = {
-                        onHandSelected(hand)
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { hand ->
+                DropdownMenuItem(
+                    onClick = {
+                        onSelect(hand)
                         expanded = false
-                    }) {
-                        Text(
-                            hand,
-                            style = textStyle,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
                     }
+                ) {
+                    Text(hand, color = MaterialTheme.colorScheme.secondary)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ResultHandChances(result: String) {
+    val entries = result.split("\n").mapNotNull {
+        val parts = it.split(" - ")
+        if (parts.size == 2) parts[0] to parts[1] else null
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Text(
+            "Ведущая рука ребёнка будет:",
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.secondary
+        )
+
+        entries.forEach { (percent, handType) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = percent,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = handType,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
         }
     }

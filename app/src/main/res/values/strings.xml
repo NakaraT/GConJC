@@ -10,4 +10,7 @@
     <string name="button_news">Новости</string>
     <string name="title_blood">Кровь</string>
     <string name="close">Закрыть</string>
+    <string name="dominant_gene">Доминантный ген</string>
+    <string name="recessive_gene">Рецессивный ген</string>
+    <string name="genes_hint">A - Доминантный ген\na - Рецессивный ген</string>
 </resources>

@@ -2,33 +2,36 @@ package com.example.myapplication.ui.components
 
 import android.app.Application
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import com.example.geneticcalc.ui.stateholder.viewModels.DashboardViewModel
-import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
+import com.example.myapplication.R
+import com.example.myapplication.utils.DashBoardValues
+import com.example.myapplication.utils.updateCellValues
 
 @Composable
-fun DashboardScreen(dashboardViewModel: DashboardViewModel) {
+fun DashboardScreen(navController: NavController) {
+
+
     val parameters = listOf("A", "a")
     val selectedParam1 = remember { mutableStateOf(parameters[0]) }
     val selectedParam2 = remember { mutableStateOf(parameters[0]) }
@@ -45,266 +48,353 @@ fun DashboardScreen(dashboardViewModel: DashboardViewModel) {
     var expandedParam3 by remember { mutableStateOf(false) }
     var expandedParam4 by remember { mutableStateOf(false) }
 
-    val countSub = remember {mutableStateOf(100.0)}
-    val countNeSub = remember {mutableStateOf(0.0)}
+    val countSub = remember { mutableStateOf(100.0) }
+    val countNeSub = remember { mutableStateOf(0.0) }
 
-    val params = UpdateCellValuesParams(selectedParam1, selectedParam2, selectedParam3,
-        selectedParam4, cell1Text, cell2Text, cell3Text, cell4Text, countSub, countNeSub)
+    val params = DashBoardValues(
+        selectedParam1, selectedParam2, selectedParam3, selectedParam4,
+        cell1Text, cell2Text, cell3Text, cell4Text, countSub, countNeSub
+    )
 
     updateCellValues(params)
-    LazyColumn(Modifier.padding(16.dp)) {
-        item {
-            Text(
-                text = "A - Доминантный ген\na - Рецессивный ген",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = colorScheme.secondary
-            )
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.inverseOnSurface
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.genes_hint),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .padding(16.dp),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+
+            item {
+                GeneTableCard(
+                    selectedParam1, selectedParam2, selectedParam3, selectedParam4,
+                    expandedParam1, expandedParam2, expandedParam3, expandedParam4,
+                    { expandedParam1 = it }, { expandedParam2 = it },
+                    { expandedParam3 = it }, { expandedParam4 = it },
+                    parameters, params, cell1Text.value, cell2Text.value,
+                    cell3Text.value, cell4Text.value
+                )
+            }
+
+            item {
+                StatisticsCard(countSub.value, countNeSub.value)
+            }
         }
-// 1 cтолбец
-        item {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.background(colorScheme.inverseOnSurface)) {
-//1.1
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart,
+    }
+}
+
+@Composable
+fun GeneTableCard(
+    selectedParam1: MutableState<String>,
+    selectedParam2: MutableState<String>,
+    selectedParam3: MutableState<String>,
+    selectedParam4: MutableState<String>,
+    expandedParam1: Boolean,
+    expandedParam2: Boolean,
+    expandedParam3: Boolean,
+    expandedParam4: Boolean,
+    onExpandedChange1: (Boolean) -> Unit,
+    onExpandedChange2: (Boolean) -> Unit,
+    onExpandedChange3: (Boolean) -> Unit,
+    onExpandedChange4: (Boolean) -> Unit,
+    parameters: List<String>,
+    params: DashBoardValues,
+    cell1Text: String,
+    cell2Text: String,
+    cell3Text: String,
+    cell4Text: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.inverseOnSurface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Таблица
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                // Первая строка
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.inverseOnSurface),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
                         text = "A/a",
-                        color = colorScheme.primary,
-                        fontSize = 20.sp,
-                        modifier = Modifier.align(Alignment.Center))
-                }
-//1.2
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = selectedParam1.value,
-                        modifier = Modifier.clickable { expandedParam1 = true }.align(Alignment.Center),
-                        color = colorScheme.primary,
-                        fontSize = 20.sp
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(12.dp),
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.secondary
                     )
-                    DropdownMenu(
+                    DropdownGeneBox(
+                        selected = selectedParam1,
                         expanded = expandedParam1,
-                        onDismissRequest = { expandedParam1 = false }
-                    ) {
-                        parameters.forEach { param ->
-                            DropdownMenuItem(onClick = {
-                                selectedParam1.value = param
-                                expandedParam1 = false
-                                updateCellValues(params)
-                            }) {
-                                Text(text = param, color = colorScheme.primary, fontSize = 20.sp)
-                            }
-                        }
-                    }
-                }
-//1.3
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = selectedParam2.value,
-                        modifier = Modifier.clickable { expandedParam2 = true }.align(Alignment.Center),
-                        color = colorScheme.primary,
-                        fontSize = 20.sp
+                        onExpandedChange = onExpandedChange1,
+                        parameters = parameters,
+                        params = params,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp)
                     )
-                    DropdownMenu(
+                    DropdownGeneBox(
+                        selected = selectedParam2,
                         expanded = expandedParam2,
-                        onDismissRequest = { expandedParam2 = false }
-                    ) {
-                        parameters.forEach { param ->
-                            DropdownMenuItem(onClick = {
-                                selectedParam2.value = param
-                                expandedParam2 = false
-                                updateCellValues(params)
-                            }) {
-                                Text(text = param, color = colorScheme.primary, fontSize = 20.sp)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-// 2 cтолбец
-        item {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.background(colorScheme.inverseOnSurface)) {
-//2.1
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = selectedParam3.value,
-                        modifier = Modifier.clickable { expandedParam3 = true }.align(Alignment.Center),
-                        color = colorScheme.primary,
-                        fontSize = 20.sp
+                        onExpandedChange = onExpandedChange2,
+                        parameters = parameters,
+                        params = params,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp)
                     )
-                    DropdownMenu(
+                }
+
+                // Вторая строка
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    DropdownGeneBox(
+                        selected = selectedParam3,
                         expanded = expandedParam3,
-                        onDismissRequest = { expandedParam3 = false }
-                    ) {
-                        parameters.forEach { param ->
-                            DropdownMenuItem(onClick = {
-                                selectedParam3.value = param
-                                expandedParam3 = false
-                                updateCellValues(params)
-                            }) {
-                                Text(text = param,
-                                    color = colorScheme.primary,
-                                    fontSize = 20.sp
-                                )
-                            }
-                        }
-                    }
-                }
-//2.2
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(text = cell1Text.value,
-                        color = colorScheme.primary,
-                        fontSize = 20.sp,
-                        modifier = Modifier.align(Alignment.Center))
-                }
-//2.3
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = cell2Text.value,
-                        color = colorScheme.primary,
-                        fontSize = 20.sp,
-                        modifier = Modifier.align(Alignment.Center))
-                }
-            }
-        }
-// 3 cтолбец
-        item {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.background(colorScheme.inverseOnSurface)) {
-//3.1
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = selectedParam4.value,
-                        modifier = Modifier.clickable { expandedParam4 = true }.align(Alignment.Center),
-                        color = colorScheme.primary,
-                        fontSize = 20.sp
+                        onExpandedChange = onExpandedChange3,
+                        parameters = parameters,
+                        params = params,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp)
+                            .background(MaterialTheme.colorScheme.inverseOnSurface)
                     )
-                    DropdownMenu(
+                    Text(
+                        text = cell1Text,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(12.dp),
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        color = getColorForGene(cell1Text)
+                    )
+                    Text(
+                        text = cell2Text,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(12.dp),
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        color = getColorForGene(cell2Text)
+                    )
+                }
+
+                // Третья строка
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    DropdownGeneBox(
+                        selected = selectedParam4,
                         expanded = expandedParam4,
-                        onDismissRequest = { expandedParam4 = false }
-                    ) {
-                        parameters.forEach { param ->
-                            DropdownMenuItem(onClick = {
-                                selectedParam4.value = param
-                                expandedParam4 = false
-                                updateCellValues(params)
-                            }) {
-                                Text(text = param,
-                                    color = colorScheme.primary,
-                                    fontSize = 20.sp
-                                )
-                            }
-                        }
-                    }
-                }
-//3.2
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
+                        onExpandedChange = onExpandedChange4,
+                        parameters = parameters,
+                        params = params,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp)
+                            .background(MaterialTheme.colorScheme.inverseOnSurface)
+                    )
                     Text(
-                        text = cell3Text.value,
-                        color = colorScheme.primary,
-                        fontSize = 20.sp,
-                        modifier = Modifier.align(Alignment.Center))
-                }
-//3.3
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
+                        text = cell3Text,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(12.dp),
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        color = getColorForGene(cell3Text)
+                    )
                     Text(
-                        text = cell4Text.value,
-                        color = colorScheme.primary,
-                        fontSize = 20.sp,
-                        modifier = Modifier.align(Alignment.Center))
+                        text = cell4Text,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(12.dp),
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        color = getColorForGene(cell4Text)
+                    )
                 }
             }
         }
-        item {
+    }
+}
+
+@Composable
+fun StatisticsCard(countSub: Double, countNeSub: Double) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.inverseOnSurface // У тебя нет такого цвета
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatRow(stringResource(R.string.dominant_gene), countSub, MaterialTheme.colorScheme.primary)
+            StatRow(stringResource(R.string.recessive_gene), countNeSub, MaterialTheme.colorScheme.tertiary)
+        }
+    }
+}
+
+@Composable
+fun StatRow(label: String, value: Double, color: Color) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(
-                text = "${countSub.value} - Вероятность передачи доминантного гена\n${countNeSub.value} - Вероятность передачи рецессивного гена",
-                fontSize = 20.sp,
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = colorScheme.secondary
+                text = label,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Text(
+                text = "${value.toInt()}%",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
             )
         }
+        LinearProgressIndicator(
+            progress = { (value / 100).toFloat() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp)),
+            color = color,
+            trackColor = MaterialTheme.colorScheme.background,
+        )
     }
 }
 
-fun updateCellValues(params: UpdateCellValuesParams) {
-    with(params) {
-        cell1Text.value = transformGeneFormat("${selectedParam1.value}/${selectedParam3.value}")
-        cell2Text.value = transformGeneFormat("${selectedParam2.value}/${selectedParam3.value}")
-        cell3Text.value = transformGeneFormat("${selectedParam4.value}/${selectedParam1.value}")
-        cell4Text.value = transformGeneFormat("${selectedParam4.value}/${selectedParam2.value}")
-        val textCells = listOf(cell1Text.value, cell2Text.value, cell3Text.value, cell4Text.value)
-        val aaCount = textCells.sumOf { countSubstring(it, "a/a") }
-        countSub.value = (4 - aaCount) / 4.0 * 100
-        countNeSub.value = 100.0 - countSub.value
+@Composable
+fun DropdownGeneBox(
+    selected: MutableState<String>,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    parameters: List<String>,
+    params: DashBoardValues,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                RoundedCornerShape(8.dp)
+            )
+            .clickable { onExpandedChange(true) }
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = selected.value,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Icon(
+                Icons.Default.ArrowDropDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier.background(MaterialTheme.colorScheme.inverseOnSurface)
+        ) {
+            parameters.forEach { param ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = param,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 16.sp
+                        )
+                    },
+                    onClick = {
+                        selected.value = param
+                        onExpandedChange(false)
+                        updateCellValues(params)
+                    },
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.inverseOnSurface)
+                        .fillMaxWidth()
+                )
+            }
+        }
     }
 }
 
-fun transformGeneFormat(gene: String): String {
-    return if (gene.equals("a/A")){
-        "A/a"
-    }
-    else {
-        gene
+@Composable
+fun getColorForGene(gene: String): Color {
+    return when (gene) {
+        "A/A" -> MaterialTheme.colorScheme.primary
+        "A/a" -> MaterialTheme.colorScheme.tertiary
+        "a/a" -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
+        else -> MaterialTheme.colorScheme.primary
     }
 }
 
-fun countSubstring(str: String, substr: String): Int {
-    var count = 0
-    var idx = 0
-    while (str.indexOf(substr, idx).also { idx = it } != -1) {
-        idx += substr.length
-        count++
-    }
-    return count
-}
 
-class DashboardViewModelFactory(val application: Application):
-    ViewModelProvider.Factory{
+class DashboardViewModelFactory(val application: Application) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return DashboardViewModel(application) as T
     }
 }
 
-data class UpdateCellValuesParams(
-    val selectedParam1: MutableState<String>,
-    val selectedParam2: MutableState<String>,
-    val selectedParam3: MutableState<String>,
-    val selectedParam4: MutableState<String>,
-    val cell1Text: MutableState<String>,
-    val cell2Text: MutableState<String>,
-    val cell3Text: MutableState<String>,
-    val cell4Text: MutableState<String>,
-    val countSub: MutableState<Double>,
-    val countNeSub: MutableState<Double>
-)

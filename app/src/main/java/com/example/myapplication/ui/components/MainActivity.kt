@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.components
 
-import android.app.Application
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,22 +18,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.geneticcalc.ui.stateholder.viewModels.DashboardViewModel
-import com.example.geneticcalc.ui.stateholder.viewModels.HomeViewModel
-import com.example.geneticcalc.ui.stateholder.viewModels.RelativesListViewModel
 
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.utils.Constants
 import com.example.myapplication.utils.PREFERENCES
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,11 +49,7 @@ class MainActivity : ComponentActivity() {
                         },
                         content = { padding ->
                             NavHostContainer(
-                                navController = navController, padding = padding, sharedPreferences = sharedPreferences, homeViewModel = HomeViewModel(),
-                                relativesListViewModel =
-                                LocalViewModelStoreOwner.current?.let { viewModel (it, "RelativesListViewModel",RelativeListViewModelFactory(LocalContext.current.applicationContext as Application))},
-                                dashboardViewModel =
-                                LocalViewModelStoreOwner.current?.let { viewModel (it, "DashboardViewModel",DashboardViewModelFactory(LocalContext.current.applicationContext as Application))}
+                                navController = navController, padding = padding, sharedPreferences = sharedPreferences
                             )
                         }
                     )
@@ -73,9 +65,6 @@ fun NavHostContainer(
     navController: NavHostController,
     padding: PaddingValues,
     sharedPreferences : SharedPreferences,
-    homeViewModel: HomeViewModel?,
-    relativesListViewModel: RelativesListViewModel?,
-    dashboardViewModel: DashboardViewModel?
 ) {
 
     NavHost(
@@ -84,19 +73,13 @@ fun NavHostContainer(
         modifier = Modifier.padding(paddingValues = padding),
         builder = {
             composable("home") {
-                if (homeViewModel != null) {
-                    HomeScreen(navController = navController, sharedPreferences = sharedPreferences, homeViewModel)
-                }
+                    HomeScreen(navController = navController, sharedPreferences = sharedPreferences)
             }
             composable("information") {
-                if (relativesListViewModel != null) {
-                    InformationScreen(relativesListViewModel)
-                }
+                    InformationScreen(navController)
             }
             composable("dashboard") {
-                if (dashboardViewModel != null) {
-                    DashboardScreen(dashboardViewModel)
-                }
+                    DashboardScreen(navController)
             }
             composable("news") {
                 NewsScreen(sharedPreferences = sharedPreferences)
