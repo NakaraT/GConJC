@@ -72,9 +72,9 @@
 |---------------|--------------|--------|
 | ![Главный экран](screenshots/main_screen.png) | ![Анализ генов](screenshots/gene_analysis.png) | ![Данные](screenshots/data_screen.png) |
 
-| Редактирование персоны | Таблица генов |
-|-------------------------|---------------|
-| ![Редактирование](screenshots/edit_person.png) | ![Таблица](screenshots/gene_table.png) |
+| Редактирование персоны | Таблица генов | Новости |
+|-------------------------|---------------|---------|
+| ![Редактирование](screenshots/edit_person.png) | ![Таблица](screenshots/gene_table.png) | ![Новости](screenshots/news.png) |
 
 
 ---
